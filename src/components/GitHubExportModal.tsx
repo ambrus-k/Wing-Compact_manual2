@@ -54,6 +54,21 @@ export const GitHubExportModal: React.FC<GitHubExportModalProps> = ({ isOpen, on
               </li>
             </ol>
           </div>
+          
+          <div className="space-y-4 pt-4 border-t border-white/10">
+            <h3 className="text-white font-bold text-base">Jak vynutit nasazení (Deployment) na Vercelu</h3>
+            <p className="text-white/80 leading-relaxed">
+              Pokud jsi repozitář na Vercel úspěšně napojil, ale <strong>nespustil se automaticky první build</strong>, máš dvě možnosti:
+            </p>
+            <ol className="space-y-4 list-decimal list-inside text-white/80 marker:text-white/40">
+              <li className="pl-2">
+                <strong className="text-white">Přes Vercel nástěnku (Manuálně):</strong> Ve Vercelu otevři svůj projekt, jdi do záložky <strong>Deployments</strong>. Pokud tam vidíš starý deployment, klikni na tři tečky vpravo (<code>...</code>) a zvol <strong>Redeploy</strong>.
+              </li>
+              <li className="pl-2">
+                <strong className="text-white">Úpravou v AI Studiu (Automaticky):</strong> Vercel poslouchá změny na GitHubu. Tím, že jsem právě teď přidal tento text o Vercelu do aplikace, <strong>automaticky se odeslal nový kód na GitHub</strong>. Tato změna by měla v tuto chvíli už sama <strong>vyvolat nový deployment na Vercelu!</strong> Můžeš to zkontrolovat na svém Vercel účtu.
+              </li>
+            </ol>
+          </div>
 
           <div className="bg-white/5 border border-white/10 p-4 rounded-xl flex items-start gap-3">
             <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />

@@ -114,7 +114,7 @@ export const MicrophonesLocker: React.FC = () => {
                         <div key={mic.id} className="bg-[#1a1a1a] border border-white/5 rounded-xl overflow-hidden flex flex-row group hover:border-emerald-500/30 transition-all shadow-md hover:shadow-emerald-900/10 h-32">
                           <div className="w-32 bg-black/50 p-2 flex items-center justify-center shrink-0 border-r border-white/5 relative">
                             <img 
-                              src={mic.imageUrl} 
+                              src={`${mic.imageUrl}?v=2`} 
                               alt={mic.name} 
                               className="w-full h-full object-contain filter group-hover:scale-110 transition-transform duration-300"
                               crossOrigin="anonymous"
