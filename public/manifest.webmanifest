@@ -1,0 +1,54 @@
+{
+  "name": "Behringer WING Compact – Pro Guide & Sound Lab",
+  "short_name": "WING Guide",
+  "description": "Profesionální interaktivní manuál, zvuková laboratoř a správce scén pro Behringer WING Compact.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#09090B",
+  "theme_color": "#F27D26",
+  "orientation": "any",
+  "categories": ["music", "utilities", "productivity"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "64x64",
+      "type": "image/svg+xml"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Manuál WING",
+      "short_name": "Manuál",
+      "description": "Kompletní technická dokumentace a vyhledávání",
+      "url": "/?tab=manual",
+      "icons": [{ "src": "/favicon.svg", "sizes": "64x64" }]
+    },
+    {
+      "name": "Zvukový Lab",
+      "short_name": "Sound Lab",
+      "description": "Knihovna kanálových stripů a DSP presetů",
+      "url": "/?tab=soundlab",
+      "icons": [{ "src": "/favicon.svg", "sizes": "64x64" }]
+    },
+    {
+      "name": "Knihovna scén",
+      "short_name": "Scény",
+      "description": "Správa snapshotů a export do PDF/JSON",
+      "url": "/?tab=scenes",
+      "icons": [{ "src": "/favicon.svg", "sizes": "64x64" }]
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+    <title>WING Compact Manual & Sound Lab</title>
+    <meta name="description" content="Kompletní interaktivní manuál pro Behringer WING Compact s vyhledáváním, knihovnou výchozích nastavení (Gate, EQ, Comp, FX) pro kapely, orchestry a vokály, správcem oblíbených scén a diagnostickým panelem." />
+    
+    <!-- PWA & Mobile Web App Meta Tags -->
+    <meta name="theme-color" content="#0A0A0A" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="application-name" content="WING Guide" />
+    
+    <!-- Icons & Manifest -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/icon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="WING Compact Manual & Sound Lab" />
+    <meta property="og:description" content="Kompletní interaktivní manuál pro Behringer WING Compact s vyhledáváním, knihovnou výchozích nastavení (Gate, EQ, Comp, FX) pro kapely, orchestry a vokály, správcem oblíbených scén a diagnostickým panelem." />
+    <meta property="og:image" content="/icon.svg" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="WING Compact Manual & Sound Lab" />
+    <meta name="twitter:description" content="Kompletní interaktivní manuál pro Behringer WING Compact" />
+    <meta name="twitter:image" content="/icon.svg" />
+  </head>
+  <body class="bg-[#09090B] text-white antialiased selection:bg-white/20 selection:text-white">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Clear out any old service workers aggressively
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for(let registration of registrations) {
+            registration.unregister();
+            console.log('Unregistered old service worker.');
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

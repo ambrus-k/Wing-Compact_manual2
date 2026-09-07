@@ -1,0 +1,6 @@
+{
+  "name": "WING Compact Manual & Sound Lab",
+  "description": "Kompletní interaktivní manuál pro Behringer WING Compact s vyhledáváním, knihovnou výchozích nastavení (Gate, EQ, Comp, FX) pro kapely, orchestry a vokály, správcem oblíbených scén a diagnostickým panelem.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
