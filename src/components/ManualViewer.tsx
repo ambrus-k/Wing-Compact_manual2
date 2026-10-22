@@ -28,33 +28,58 @@ import {
   BarChart2,
   LayoutGrid,
   X,
-  Maximize2
+  Maximize2,
+  FileText
 } from 'lucide-react';
 import { FunctionDiagram } from './FunctionDiagram';
 
+import { MixerId } from '../types';
+import { getManualChapters } from '../data/manualData';
+import { MIXERS } from '../data/mixersConfig';
+
 interface ManualViewerProps {
+  activeMixerId: MixerId;
   onNavigateToPresets?: (category?: string) => void;
+  onOpenPdf?: () => void;
   initialChapterId?: string;
   initialSubsectionId?: string;
 }
 
 export const ManualViewer: React.FC<ManualViewerProps> = ({
+  activeMixerId,
   onNavigateToPresets,
+  onOpenPdf,
   initialChapterId,
   initialSubsectionId
 }) => {
-  const [selectedChapterId, setSelectedChapterId] = useState<string>(
-    initialChapterId || MANUAL_CHAPTERS[0].id
-  );
-  const [selectedSubsectionId, setSelectedSubsectionId] = useState<string>(
-    initialSubsectionId || MANUAL_CHAPTERS[0].subsections[0].id
-  );
+  const currentMixer = MIXERS[activeMixerId] || MIXERS.wing;
+  const mixerChapters = getManualChapters(activeMixerId);
+
+  const [selectedChapterId, setSelectedChapterId] = useState<string>(() => {
+    return initialChapterId || mixerChapters[0]?.id || '';
+  });
+  const [selectedSubsectionId, setSelectedSubsectionId] = useState<string>(() => {
+    return initialSubsectionId || mixerChapters[0]?.subsections[0]?.id || '';
+  });
   const [manualSearch, setManualSearch] = useState<string>('');
   const contentRef = useRef<HTMLDivElement>(null);
 
+  // When active mixer changes, reset to the first chapter of that mixer if not specifically targeted
+  useEffect(() => {
+    const chapters = getManualChapters(activeMixerId);
+    if (!initialChapterId || !chapters.some(c => c.id === initialChapterId)) {
+      if (chapters.length > 0) {
+        setSelectedChapterId(chapters[0].id);
+        if (chapters[0].subsections.length > 0) {
+          setSelectedSubsectionId(chapters[0].subsections[0].id);
+        }
+      }
+    }
+  }, [activeMixerId]);
+
   const [bookmarkedIds, setBookmarkedIds] = useState<string[]>(() => {
     try {
-      const saved = localStorage.getItem('wing_manual_bookmarks');
+      const saved = localStorage.getItem(`manual_bookmarks_${activeMixerId}`);
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -63,18 +88,19 @@ export const ManualViewer: React.FC<ManualViewerProps> = ({
 
   // Synchronize when initialChapterId or initialSubsectionId changes from global search or links
   useEffect(() => {
+    const chapters = getManualChapters(activeMixerId);
     if (initialChapterId) {
       setSelectedChapterId(initialChapterId);
     }
     if (initialSubsectionId) {
       setSelectedSubsectionId(initialSubsectionId);
     } else if (initialChapterId) {
-      const foundChapter = MANUAL_CHAPTERS.find(c => c.id === initialChapterId);
+      const foundChapter = chapters.find(c => c.id === initialChapterId);
       if (foundChapter && foundChapter.subsections.length > 0) {
         setSelectedSubsectionId(foundChapter.subsections[0].id);
       }
     }
-  }, [initialChapterId, initialSubsectionId]);
+  }, [initialChapterId, initialSubsectionId, activeMixerId]);
 
   // Scroll reader to top whenever subsection or chapter changes
   useEffect(() => {
@@ -84,7 +110,7 @@ export const ManualViewer: React.FC<ManualViewerProps> = ({
   }, [selectedChapterId, selectedSubsectionId]);
 
   // 1. Flatten all manual chapters and subsections into a continuous sequence
-  const allManualSteps = MANUAL_CHAPTERS.flatMap(ch => 
+  const allManualSteps = mixerChapters.flatMap(ch => 
     ch.subsections.map((sub, sIdx) => ({
       chapterId: ch.id,
       chapterNumber: ch.number,
@@ -184,7 +210,7 @@ export const ManualViewer: React.FC<ManualViewerProps> = ({
 
   // Filter chapters/subsections based on manualSearch
   const q = manualSearch.toLowerCase().trim();
-  const filteredChapters = MANUAL_CHAPTERS.map(ch => {
+  const filteredChapters = mixerChapters.map(ch => {
     const matchingSubs = ch.subsections.filter(sub => 
       !q ||
       sub.title.toLowerCase().includes(q) ||
@@ -208,11 +234,11 @@ export const ManualViewer: React.FC<ManualViewerProps> = ({
           <div className="flex items-center gap-2">
             <BookOpen className="w-5 h-5 text-white/80" />
             <h3 className="text-sm font-bold uppercase tracking-wider text-white">
-              Obsah manuálu WING
+              {currentMixer.name}
             </h3>
           </div>
-          <span className="text-xs font-mono text-white/50 bg-white/5 px-2.5 py-1 rounded border border-white/5">
-            {MANUAL_CHAPTERS.length} kapitol
+          <span className="text-xs font-mono text-white/50 bg-white/5 px-2 py-0.5 rounded border border-white/5 text-[11px]">
+            {mixerChapters.length} kapitol
           </span>
         </div>
 
@@ -304,6 +330,29 @@ export const ManualViewer: React.FC<ManualViewerProps> = ({
 
       {/* Main Content Reader */}
       <div ref={contentRef} className="flex-1 min-w-0 space-y-4">
+        {/* Active Mixer Official Banner */}
+        <div className={`p-3.5 rounded-2xl border flex flex-wrap items-center justify-between gap-3 ${currentMixer.borderColor} bg-gradient-to-r from-white/[0.04] to-transparent shadow-md`}>
+          <div className="flex items-center gap-2.5">
+            <span className={`text-[11px] font-mono font-bold px-2.5 py-1 rounded-md uppercase tracking-wider ${currentMixer.accentBg}`}>
+              {currentMixer.fullName}
+            </span>
+            <span className="text-xs text-white/60 hidden sm:inline">
+              {currentMixer.tagline}
+            </span>
+          </div>
+
+          {currentMixer.pdfUrl && onOpenPdf && (
+            <button
+              onClick={onOpenPdf}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 text-red-300 hover:text-white text-xs font-semibold transition-all cursor-pointer"
+              title="Zobrazit originální uživatelský manuál v PDF"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>Otevřít originální PDF ({currentMixer.model})</span>
+            </button>
+          )}
+        </div>
+
         <div className="bg-[#121212] border border-white/10 rounded-2xl p-5 sm:p-8 shadow-xl space-y-6">
           {/* Breadcrumb & Bookmark Bar */}
           <div className="flex items-center justify-between pb-3 border-b border-white/10 text-sm">

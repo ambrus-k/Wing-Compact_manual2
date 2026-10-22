@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { SavedScene, SceneChannelPatch, SceneBusConfig, SceneDCAConfig, SceneFXSlot, SceneMatrixConfig } from '../types';
-import { INITIAL_SCENES } from '../data/sampleScenes';
+import { INITIAL_SCENES, INITIAL_SCENES_WING, getInitialScenesForMixer } from '../data/sampleScenes';
 import { StageRiderPdfModal } from './StageRiderPdfModal';
+import { MixingStationModal } from './MixingStationModal';
+import { SceneAiAuditModal } from './SceneAiAuditModal';
+import { CreateSceneModal } from './CreateSceneModal';
 import { 
   Layers, 
   Plus, 
@@ -30,12 +33,14 @@ import {
   Edit3,
   Check,
   X,
-  Music
+  Music,
+  Radio
 } from 'lucide-react';
 
 interface ScenesManagerProps {
   onOpenAppendix?: () => void;
   onNavigateToPreset?: (presetId: string) => void;
+  mixerModel?: string;
 }
 
 type SceneSubTab = 'patch' | 'mixer' | 'routing' | 'usb_guide';
@@ -127,20 +132,22 @@ export const getPresetIdForChannel = (ch: SceneChannelPatch, ensemble?: string):
 };
 
 // Helper to guarantee rich channels and sub-arrays are never lost from cache
-const sanitizeScenes = (stored: any[]): SavedScene[] => {
+// Helper to guarantee rich channels and sub-arrays are never lost from cache
+const sanitizeScenes = (stored: any[], mixerModel: string = 'wing'): SavedScene[] => {
+  const defaults = getInitialScenesForMixer(mixerModel);
   if (!Array.isArray(stored) || stored.length === 0) {
-    return INITIAL_SCENES;
+    return defaults;
   }
   return stored.map(s => {
-    const defaultScene = INITIAL_SCENES.find(ds => ds.id === s.id) || INITIAL_SCENES[0];
-    const channels = (Array.isArray(s.channels) && s.channels.length > 0) ? s.channels : defaultScene.channels;
-    const buses = (Array.isArray(s.buses) && s.buses.length > 0) ? s.buses : defaultScene.buses;
-    const dcas = (Array.isArray(s.dcas) && s.dcas.length > 0) ? s.dcas : defaultScene.dcas;
-    const fxSlots = (Array.isArray(s.fxSlots) && s.fxSlots.length > 0) ? s.fxSlots : defaultScene.fxSlots;
-    const matrices = (Array.isArray(s.matrices) && s.matrices.length > 0) ? s.matrices : defaultScene.matrices;
+    const defaultScene = defaults.find(ds => ds.id === s.id) || defaults[0] || INITIAL_SCENES[0];
+    const channels = (Array.isArray(s.channels) && s.channels.length > 0) ? s.channels : (defaultScene?.channels || []);
+    const buses = (Array.isArray(s.buses) && s.buses.length > 0) ? s.buses : (defaultScene?.buses || []);
+    const dcas = (Array.isArray(s.dcas) && s.dcas.length > 0) ? s.dcas : (defaultScene?.dcas || []);
+    const fxSlots = (Array.isArray(s.fxSlots) && s.fxSlots.length > 0) ? s.fxSlots : (defaultScene?.fxSlots || []);
+    const matrices = (Array.isArray(s.matrices) && s.matrices.length > 0) ? s.matrices : (defaultScene?.matrices || []);
 
     return {
-      ...defaultScene,
+      ...(defaultScene || {}),
       ...s,
       channels: channels || [],
       buses: buses || [],
@@ -151,22 +158,28 @@ const sanitizeScenes = (stored: any[]): SavedScene[] => {
   });
 };
 
-export const ScenesManager: React.FC<ScenesManagerProps> = ({ onOpenAppendix, onNavigateToPreset }) => {
+export const ScenesManager: React.FC<ScenesManagerProps> = ({ 
+  onOpenAppendix, 
+  onNavigateToPreset,
+  mixerModel = 'wing'
+}) => {
   const [scenes, setScenes] = useState<SavedScene[]>(() => {
     try {
-      const saved = localStorage.getItem('wing_user_scenes_v4');
+      const storageKey = `${mixerModel}_user_scenes_v4`;
+      const saved = localStorage.getItem(storageKey);
       if (saved) {
         const parsed = JSON.parse(saved);
-        return sanitizeScenes(parsed);
+        return sanitizeScenes(parsed, mixerModel);
       }
-      return INITIAL_SCENES;
+      return getInitialScenesForMixer(mixerModel);
     } catch {
-      return INITIAL_SCENES;
+      return getInitialScenesForMixer(mixerModel);
     }
   });
 
   const [selectedSceneId, setSelectedSceneId] = useState<string>(() => {
-    return INITIAL_SCENES[0].id;
+    const initialList = getInitialScenesForMixer(mixerModel);
+    return initialList[0]?.id || 'scene-rock-fest-24';
   });
   const [activeSubTab, setActiveSubTab] = useState<SceneSubTab>('patch');
   const [recalledSuccess, setRecalledSuccess] = useState<boolean>(false);
@@ -176,28 +189,25 @@ export const ScenesManager: React.FC<ScenesManagerProps> = ({ onOpenAppendix, on
 
   // Modals state
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+  const [pdfCustomChannels, setPdfCustomChannels] = useState<SceneChannelPatch[] | null>(null);
+  const [isMixingStationModalOpen, setIsMixingStationModalOpen] = useState(false);
+  const [isAiAuditModalOpen, setIsAiAuditModalOpen] = useState(false);
   const [showCreateSceneModal, setShowCreateSceneModal] = useState(false);
   const [showAddChannelModal, setShowAddChannelModal] = useState(false);
   const [editingChannel, setEditingChannel] = useState<SceneChannelPatch | null>(null);
 
-  // New Scene Form State
-  const [newSceneName, setNewSceneName] = useState('');
-  const [newSceneEnsemble, setNewSceneEnsemble] = useState('Rocková kapela');
-  const [newSceneDesc, setNewSceneDesc] = useState('');
-  const [newSceneTemplate, setNewSceneTemplate] = useState<string>('scene-rock-24ch');
-
   // New / Edit Channel Form State
   const [channelFormChNum, setChannelFormChNum] = useState(1);
   const [channelFormName, setChannelFormName] = useState('');
-  const [channelFormInput, setChannelFormInput] = useState('Local In 1 (XLR)');
+  const [channelFormInput, setChannelFormInput] = useState(mixerModel === 'ui24' ? 'Studer In 1 (Combo)' : 'Local In 1 (XLR)');
   const [channelFormGain, setChannelFormGain] = useState(28);
   const [channelForm48V, setChannelForm48V] = useState(false);
   const [channelFormPhase, setChannelFormPhase] = useState(false);
   const [channelFormGateOn, setChannelFormGateOn] = useState(true);
-  const [channelFormGateModel, setChannelFormGateModel] = useState('WING Gate/Exp');
-  const [channelFormEqModel, setChannelFormEqModel] = useState('WING 6-Band PEQ');
+  const [channelFormGateModel, setChannelFormGateModel] = useState(mixerModel === 'ui24' ? 'Ui dbx Noise Gate' : mixerModel === 'x32' ? 'X32 Expander/Gate' : 'WING Gate/Exp');
+  const [channelFormEqModel, setChannelFormEqModel] = useState(mixerModel === 'ui24' ? 'Ui 4-Band Parametric + HPF' : mixerModel === 'x32' ? 'X32 4-Band Parametric EQ' : 'WING 6-Band PEQ');
   const [channelFormCompOn, setChannelFormCompOn] = useState(true);
-  const [channelFormCompModel, setChannelFormCompModel] = useState('1176 FET Comp');
+  const [channelFormCompModel, setChannelFormCompModel] = useState(mixerModel === 'ui24' ? 'Ui dbx Compressor' : mixerModel === 'x32' ? 'X32 Channel Comp' : '1176 FET Comp');
   const [channelFormDca, setChannelFormDca] = useState<number | undefined>(undefined);
   const [channelFormFader, setChannelFormFader] = useState(0);
   const [channelFormColor, setChannelFormColor] = useState('orange');
@@ -207,18 +217,49 @@ export const ScenesManager: React.FC<ScenesManagerProps> = ({ onOpenAppendix, on
   const [sendsOnFaderBus, setSendsOnFaderBus] = useState<number | null>(null);
   const [selectedChannelForDetail, setSelectedChannelForDetail] = useState<SceneChannelPatch | null>(null);
 
+  // Switch scenes and load appropriate console presets when mixerModel changes
   useEffect(() => {
     try {
-      localStorage.setItem('wing_user_scenes_v4', JSON.stringify(scenes));
+      const storageKey = `${mixerModel}_user_scenes_v4`;
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const sanitized = sanitizeScenes(parsed, mixerModel);
+        setScenes(sanitized);
+        if (sanitized.length > 0 && !sanitized.some(s => s.id === selectedSceneId)) {
+          setSelectedSceneId(sanitized[0].id);
+        }
+      } else {
+        const defaults = getInitialScenesForMixer(mixerModel);
+        setScenes(defaults);
+        if (defaults.length > 0) {
+          setSelectedSceneId(defaults[0].id);
+        }
+      }
+    } catch {
+      const defaults = getInitialScenesForMixer(mixerModel);
+      setScenes(defaults);
+      if (defaults.length > 0) {
+        setSelectedSceneId(defaults[0].id);
+      }
+    }
+  }, [mixerModel]);
+
+  // Persist scenes for current mixerModel
+  useEffect(() => {
+    try {
+      const storageKey = `${mixerModel}_user_scenes_v4`;
+      localStorage.setItem(storageKey, JSON.stringify(scenes));
     } catch (e) {
       console.warn('Failed to save scenes:', e);
     }
-  }, [scenes]);
+  }, [scenes, mixerModel]);
 
-  const currentScene = scenes.find(s => s.id === selectedSceneId) || scenes[0] || INITIAL_SCENES[0];
+  const currentDefaults = getInitialScenesForMixer(mixerModel);
+  const currentScene = scenes.find(s => s.id === selectedSceneId) || scenes[0] || currentDefaults[0] || INITIAL_SCENES[0];
   const safeChannels: SceneChannelPatch[] = currentScene.channels && currentScene.channels.length > 0 
     ? currentScene.channels 
-    : (INITIAL_SCENES.find(s => s.id === currentScene.id)?.channels || INITIAL_SCENES[0].channels || []);
+    : (currentDefaults.find(s => s.id === currentScene.id)?.channels || currentDefaults[0]?.channels || INITIAL_SCENES[0].channels || []);
 
   const handleToggleFavorite = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -226,30 +267,74 @@ export const ScenesManager: React.FC<ScenesManagerProps> = ({ onOpenAppendix, on
   };
 
   const handleResetToFactory = () => {
-    localStorage.removeItem('wing_user_scenes');
-    localStorage.removeItem('wing_user_scenes_v2');
-    localStorage.removeItem('wing_user_scenes_v3');
-    localStorage.removeItem('wing_user_scenes_v4');
-    setScenes(INITIAL_SCENES);
-    setSelectedSceneId(INITIAL_SCENES[0].id);
+    const storageKey = `${mixerModel}_user_scenes_v4`;
+    localStorage.removeItem(storageKey);
+    localStorage.removeItem(`${mixerModel}_user_scenes`);
+    const defaults = getInitialScenesForMixer(mixerModel);
+    setScenes(defaults);
+    if (defaults.length > 0) {
+      setSelectedSceneId(defaults[0].id);
+    }
     setRecalledSuccess(true);
+    const mixerLabel = mixerModel === 'x32' ? 'Behringer X32' : mixerModel === 'ui24' ? 'Soundcraft Ui24R' : 'Behringer WING';
     setOscLog([
-      `[SYSTEM] Tovární scény WING úspěšně obnoveny.`,
-      `[OSC] /scene/load "Rock Fest 24ch"`,
-      `[DSP] 24 Midas Preamps OK • 16 Mix Buses OK • 8 FX OK`
+      `[SYSTEM] Tovární scény pro ${mixerLabel} úspěšně obnoveny.`,
+      `[OSC] Načtena výchozí scéna "${defaults[0]?.name}"`,
+      `[DSP] Kanálové pásy, routing a sběrnice resetovány.`
     ]);
     setTimeout(() => setRecalledSuccess(false), 2500);
+  };
+
+  const handleSceneCreatedOrImported = (newScene: SavedScene, sourceInfo?: string) => {
+    setScenes(prev => [newScene, ...prev]);
+    setSelectedSceneId(newScene.id);
+    setOscLog([
+      `[SYSTEM] Scéna "${newScene.name}" (${newScene.channels?.length || 0} stop) byla úspěšně načtena.`,
+      `[ZDROJ] ${sourceInfo || 'Import / Vlastní tvorba'}`,
+      `[STATUS] Scéna je aktivní v mixu. Pro detailní zvukařský rozbor klikněte na "🤖 AI Audit scény" v horní liště.`
+    ]);
+    setRecalledSuccess(true);
+    setTimeout(() => setRecalledSuccess(false), 2500);
+  };
+
+  const handleApplyAuditChanges = (updatedChannels: SceneChannelPatch[], summary: string) => {
+    setScenes(prev => prev.map(s => {
+      if (s.id === currentScene.id) {
+        return {
+          ...s,
+          channels: updatedChannels,
+          updatedAt: new Date().toISOString()
+        };
+      }
+      return s;
+    }));
+    setRecalledSuccess(true);
+    setOscLog([
+      `[AI AUDIT] Změny úspěšně schváleny a uloženy do scény "${currentScene.name}".`,
+      `[SYSTEM] ${summary}`,
+      `[STATUS] Scéna byla aktualizována podle zvukařských standardů.`
+    ]);
+    setTimeout(() => setRecalledSuccess(false), 3000);
+  };
+
+  const handleOpenPdfWithCustomChannels = (channelsToPrint: SceneChannelPatch[]) => {
+    setPdfCustomChannels(channelsToPrint);
+    setIsPdfModalOpen(true);
   };
 
   const handleRecallScene = () => {
     setRecalledSuccess(true);
 
+    const preampType = mixerModel === 'ui24' ? 'Studer' : mixerModel === 'x32' ? 'Midas' : 'Midas PRO';
+    const busCount = mixerModel === 'ui24' ? '8x Aux sběrnic + Lexicon FX' : '16x Mix sběrnic (IEM / Odposlechy)';
+    const fxInfo = mixerModel === 'ui24' ? '4x Lexicon FX procesory (Reverb, Delay, Chorus, Room)' : `8x FX Racků inicializováno (${currentScene.fxSlots?.[0]?.model || 'VSS3'})`;
+
     const logs = [
-      `[OSC UDP 2223] /show/snapshot/recall "${currentScene.name}"`,
-      `[PREAMP] Načítání ${safeChannels.length} Midas analogových gainů a +48V...`,
+      `[OSC UDP 2223] /show/snapshot/recall "${currentScene.name}" (${mixerModel.toUpperCase()})`,
+      `[PREAMP] Načítání ${safeChannels.length} ${preampType} analogových gainů a +48V...`,
       `[DSP] EQ a dynamické křivky aplikovány pro ${safeChannels.length} stop`,
-      `[BUS] 16x Mix Sběrnic naladěno (IEM & Odposlechy)`,
-      `[FX] 8x FX Racků inicializováno (${currentScene.fxSlots?.[0]?.model || 'VSS3'})`,
+      `[BUS] ${busCount} naladěno`,
+      `[FX] ${fxInfo}`,
       `[FADERS] Motorizované fadery zarovnány na cílové dB hodnoty`,
       `[STATUS] Scéna "${currentScene.name}" je AKTIVNÍ v mixu!`
     ];
@@ -269,7 +354,8 @@ export const ScenesManager: React.FC<ScenesManagerProps> = ({ onOpenAppendix, on
   const handleExportStagePatchCsv = () => {
     if (!safeChannels || safeChannels.length === 0) return;
     
-    let csv = "CH#,NAZEV_NASTROJE,VSTUP_KONEKTOR,GAIN_MIDAS,48V_PHANTOM,FAZE,GATE,EQ_MODEL,KOMPRESOR,DCA,FADER_DB,PAN\n";
+    const gainHeader = mixerModel === 'ui24' ? 'GAIN_STUDER' : mixerModel === 'x32' ? 'GAIN_MIDAS' : 'GAIN_MIDAS_PRO';
+    let csv = `CH#,NAZEV_NASTROJE,VSTUP_KONEKTOR,${gainHeader},48V_PHANTOM,FAZE,GATE,EQ_MODEL,KOMPRESOR,DCA,FADER_DB,PAN\n`;
     safeChannels.forEach(ch => {
       csv += `${ch.chNum},"${ch.name}","${ch.sourceInput}","+${ch.gainDb} dB",${ch.phantom48V ? 'ANO (+48V)' : 'NE'},${ch.phaseInvert ? 'OTOCENA (180°)' : 'NORMALNI'},"${ch.gateModel}","${ch.eqModel}","${ch.compModel}","DCA ${ch.dcaGroup || '-'}",${ch.faderDb} dB,${ch.pan}\n`;
     });
@@ -277,65 +363,84 @@ export const ScenesManager: React.FC<ScenesManagerProps> = ({ onOpenAppendix, on
     const dataStr = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `WING_Podiovy_Rider_${currentScene.name.replace(/[^a-zA-Z0-9]/g, '_')}.csv`);
+    downloadAnchor.setAttribute("download", `${mixerModel.toUpperCase()}_Podiovy_Rider_${currentScene.name.replace(/[^a-zA-Z0-9]/g, '_')}.csv`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
   };
 
-  const handleExportWingSnapText = () => {
-    let snapText = `# BEHRINGER WING COMPACT SNAPSHOT FILE\n# Scena: ${currentScene.name}\n# Obsazeni: ${currentScene.details?.targetEnsemble || 'Live'}\n# Exportovano z Behringer WING Digital Manual & Toolkit\n\n`;
-    
-    snapText += `[CHANNELS_INPUT_PATCH]\n`;
-    safeChannels.forEach(ch => {
-      snapText += `/ch/${ch.chNum}/config/name "${ch.name}"\n`;
-      snapText += `/ch/${ch.chNum}/in/source "${ch.sourceInput}"\n`;
-      snapText += `/ch/${ch.chNum}/preamp/gain ${ch.gainDb}.0\n`;
-      snapText += `/ch/${ch.chNum}/preamp/48v ${ch.phantom48V ? 1 : 0}\n`;
-      snapText += `/ch/${ch.chNum}/fader ${ch.faderDb}\n`;
-      snapText += `/ch/${ch.chNum}/pan ${ch.pan}\n`;
-    });
+  const handleExportMixerScene = () => {
+    let fileExtension = 'snap';
+    let exportText = '';
 
-    snapText += `\n[BUS_CONFIG]\n`;
-    (currentScene.buses || []).forEach(b => {
-      snapText += `/bus/${b.busNum}/config/name "${b.name}"\n`;
-      snapText += `/bus/${b.busNum}/fader ${b.faderDb}\n`;
-    });
+    if (mixerModel === 'x32') {
+      fileExtension = 'scn';
+      exportText = `# BEHRINGER X32 SCENE FILE\n# Scena: ${currentScene.name}\n# Obsazeni: ${currentScene.details?.targetEnsemble || 'Live'}\n# Vygenerovano z Mixings Manual Hub\n\n`;
+      safeChannels.forEach(ch => {
+        const chFormatted = String(ch.chNum).padStart(2, '0');
+        exportText += `/ch/${chFormatted}/config "${ch.name}" 1 ${ch.color || 'CY'} 1\n`;
+        exportText += `/ch/${chFormatted}/preamp +${ch.gainDb}.0 ${ch.phantom48V ? 'ON' : 'OFF'}\n`;
+        exportText += `/ch/${chFormatted}/mix/fader ${ch.faderDb.toFixed(1)}\n`;
+        exportText += `/ch/${chFormatted}/mix/pan ${ch.pan}\n`;
+        if (ch.gateOn) exportText += `/ch/${chFormatted}/gate ON "${ch.gateModel}"\n`;
+        exportText += `/ch/${chFormatted}/eq ON "${ch.eqModel}"\n`;
+        if (ch.compOn) exportText += `/ch/${chFormatted}/dyn ON "${ch.compModel}"\n`;
+      });
+      (currentScene.buses || []).forEach(b => {
+        const busFormatted = String(b.busNum).padStart(2, '0');
+        exportText += `/bus/${busFormatted}/config "${b.name}"\n`;
+        exportText += `/bus/${busFormatted}/mix/fader ${b.faderDb.toFixed(1)}\n`;
+      });
+    } else if (mixerModel === 'ui24') {
+      fileExtension = 'show';
+      const uiExportObject = {
+        format: 'soundcraft_ui24r_show',
+        showName: currentScene.name,
+        targetEnsemble: currentScene.details?.targetEnsemble || 'Live',
+        createdAt: currentScene.createdAt,
+        channels: safeChannels.map(ch => ({
+          channel: ch.chNum,
+          name: ch.name,
+          source: ch.sourceInput,
+          gainDb: ch.gainDb,
+          phantom48V: ch.phantom48V,
+          faderDb: ch.faderDb,
+          pan: ch.pan,
+          gate: { on: ch.gateOn, model: ch.gateModel },
+          eq: { on: true, model: ch.eqModel },
+          compressor: { on: ch.compOn, model: ch.compModel },
+          dcaGroup: ch.dcaGroup
+        })),
+        buses: currentScene.buses || [],
+        dcas: currentScene.dcas || []
+      };
+      exportText = JSON.stringify(uiExportObject, null, 2);
+    } else {
+      fileExtension = 'snap';
+      exportText = `# BEHRINGER WING COMPACT SNAPSHOT FILE\n# Scena: ${currentScene.name}\n# Obsazeni: ${currentScene.details?.targetEnsemble || 'Live'}\n# Exportovano z Behringer WING Digital Manual & Toolkit\n\n`;
+      exportText += `[CHANNELS_INPUT_PATCH]\n`;
+      safeChannels.forEach(ch => {
+        exportText += `/ch/${ch.chNum}/config/name "${ch.name}"\n`;
+        exportText += `/ch/${ch.chNum}/in/source "${ch.sourceInput}"\n`;
+        exportText += `/ch/${ch.chNum}/preamp/gain ${ch.gainDb}.0\n`;
+        exportText += `/ch/${ch.chNum}/preamp/48v ${ch.phantom48V ? 1 : 0}\n`;
+        exportText += `/ch/${ch.chNum}/fader ${ch.faderDb}\n`;
+        exportText += `/ch/${ch.chNum}/pan ${ch.pan}\n`;
+      });
+      exportText += `\n[BUS_CONFIG]\n`;
+      (currentScene.buses || []).forEach(b => {
+        exportText += `/bus/${b.busNum}/config/name "${b.name}"\n`;
+        exportText += `/bus/${b.busNum}/fader ${b.faderDb}\n`;
+      });
+    }
 
-    const dataStr = "data:text/plain;charset=utf-8," + encodeURIComponent(snapText);
+    const dataStr = "data:text/plain;charset=utf-8," + encodeURIComponent(exportText);
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `${currentScene.id}.snap`);
+    downloadAnchor.setAttribute("download", `${currentScene.id}.${fileExtension}`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
-  };
-
-  // Create new scene
-  const handleCreateScene = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newSceneName.trim()) return;
-
-    const baseTemplate = INITIAL_SCENES.find(s => s.id === newSceneTemplate) || INITIAL_SCENES[0];
-    const newId = `custom-scene-${Date.now()}`;
-    const newScene: SavedScene = {
-      ...baseTemplate,
-      id: newId,
-      name: newSceneName.trim(),
-      description: newSceneDesc.trim() || `Vlastní scéna pro pult WING (${newSceneEnsemble})`,
-      favorite: true,
-      details: {
-        ...baseTemplate.details,
-        targetEnsemble: newSceneEnsemble
-      }
-    };
-
-    setScenes(prev => [newScene, ...prev]);
-    setSelectedSceneId(newId);
-    setShowCreateSceneModal(false);
-    setNewSceneName('');
-    setNewSceneDesc('');
-    setOscLog([`[SYSTEM] Vytvořena nová vlastní scéna "${newScene.name}" s ${newScene.channels.length} kanály.`]);
   };
 
   // Duplicate current scene
@@ -589,7 +694,7 @@ export const ScenesManager: React.FC<ScenesManagerProps> = ({ onOpenAppendix, on
                 </span>
               </div>
               <p className="text-xs text-white/50 mt-0.5">
-                Vytvářejte vlastní scény, přidávejte kanály a exportujte je jako <strong>přehledný PDF Stage Rider</strong> nebo soubor pro USB pultu WING.
+                Vytvářejte vlastní scény, přidávejte kanály a exportujte je jako <strong>přehledný PDF Stage Rider</strong> nebo soubor pro USB disk pultu {mixerModel === 'x32' ? 'Behringer X32 (.scn)' : mixerModel === 'ui24' ? 'Soundcraft Ui24R (.show)' : 'Behringer WING (.snap)'}.
               </p>
             </div>
           </div>
@@ -599,15 +704,16 @@ export const ScenesManager: React.FC<ScenesManagerProps> = ({ onOpenAppendix, on
             <button
               onClick={() => setShowCreateSceneModal(true)}
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black text-xs font-bold transition-all shadow-md shadow-cyan-500/20 cursor-pointer"
+              title="Vytvořit novou scénu nebo importovat soubor pultu (WING, X32, Soundcraft, Mixing Station)"
             >
               <Plus className="w-4 h-4" />
-              <span>+ Vytvořit novou scénu</span>
+              <span>+ Vytvořit / Importovat scénu</span>
             </button>
 
             <button
               onClick={handleResetToFactory}
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/10 text-xs font-semibold transition-all cursor-pointer"
-              title="Obnovit tovární scény WING"
+              title={`Obnovit výchozí tovární scény pro ${mixerModel.toUpperCase()}`}
             >
               <RefreshCw className="w-3.5 h-3.5 text-[#AEEA00]" />
               <span>Reset</span>
@@ -696,10 +802,43 @@ export const ScenesManager: React.FC<ScenesManagerProps> = ({ onOpenAppendix, on
 
         {/* Big Action Buttons */}
         <div className="flex flex-wrap items-center gap-2">
+          {/* AI Audit & Sound Engineer Review */}
+          <button
+            onClick={() => setIsAiAuditModalOpen(true)}
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white font-extrabold rounded-xl text-xs shadow-lg shadow-cyan-500/25 transition-all cursor-pointer"
+            title="Prověřit scénu pomocí AI a zkušeností FOH zvukařů"
+          >
+            <Sparkles className="w-4 h-4 text-cyan-200" />
+            <span>AI Audit scény</span>
+          </button>
+
+          {/* Mixing Station Offline Export */}
+          <button
+            onClick={() => setIsMixingStationModalOpen(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2.5 bg-gradient-to-r from-orange-600/30 to-amber-600/30 hover:from-orange-500/40 hover:to-amber-500/40 text-orange-300 border border-orange-500/50 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-md"
+            title="Exportovat scénu do souboru pro Mixing Station (.ms)"
+          >
+            <Radio className="w-4 h-4 text-orange-400" />
+            <span>Export pro Mixing Station (.ms)</span>
+          </button>
+
+          {/* PDF Stage Rider Reader Generator Button */}
+          <button
+            onClick={() => {
+              setPdfCustomChannels(null);
+              setIsPdfModalOpen(true);
+            }}
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-red-900/30 transition-all cursor-pointer"
+            title="Otevřít a stáhnout přehledný tištěný Stage Rider v PDF"
+          >
+            <FileText className="w-4 h-4" />
+            <span>Exportovat PDF Rider</span>
+          </button>
+
           {/* Recall Scene */}
           <button
             onClick={handleRecallScene}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs font-mono transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl font-bold text-xs font-mono transition-all cursor-pointer ${
               recalledSuccess
                 ? 'bg-emerald-400 text-black shadow-lg shadow-emerald-400/30 animate-pulse'
                 : 'bg-white hover:bg-gray-200 text-black shadow-md'
@@ -708,7 +847,7 @@ export const ScenesManager: React.FC<ScenesManagerProps> = ({ onOpenAppendix, on
             {recalledSuccess ? (
               <>
                 <CheckCircle2 className="w-4 h-4" />
-                <span>SCÉNA VYVOLÁNA!</span>
+                <span>VYVOLÁNA!</span>
               </>
             ) : (
               <>
@@ -718,34 +857,24 @@ export const ScenesManager: React.FC<ScenesManagerProps> = ({ onOpenAppendix, on
             )}
           </button>
 
-          {/* PDF Stage Rider Reader Generator Button */}
-          <button
-            onClick={() => setIsPdfModalOpen(true)}
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-red-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white font-bold rounded-xl text-xs shadow-lg shadow-red-900/30 transition-all cursor-pointer"
-            title="Otevřít a stáhnout přehledný tištěný Stage Rider v PDF"
-          >
-            <FileText className="w-4 h-4" />
-            <span>Exportovat PDF Rider</span>
-          </button>
-
           {/* CSV Download */}
           <button
             onClick={handleExportStagePatchCsv}
-            className="flex items-center gap-1.5 px-3.5 py-2.5 bg-black hover:bg-white/10 text-cyan-300 border border-cyan-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-2.5 bg-black hover:bg-white/10 text-cyan-300 border border-cyan-500/30 rounded-xl text-xs font-semibold transition-all cursor-pointer"
             title="Stáhnout tabulku CSV"
           >
             <FileSpreadsheet className="w-4 h-4 text-cyan-400" />
             <span>CSV Rider</span>
           </button>
 
-          {/* USB .snap */}
+          {/* USB Scene File Export (.snap / .scn / .show) */}
           <button
-            onClick={handleExportWingSnapText}
-            className="flex items-center gap-1.5 px-3.5 py-2.5 bg-black hover:bg-white/10 text-white border border-white/10 rounded-xl text-xs font-semibold transition-all cursor-pointer"
-            title="Stáhnout pro USB disk pultu WING"
+            onClick={handleExportMixerScene}
+            className="flex items-center gap-1.5 px-3 py-2.5 bg-black hover:bg-white/10 text-white border border-white/10 rounded-xl text-xs font-semibold transition-all cursor-pointer"
+            title={`Stáhnout pro USB disk pultu ${mixerModel.toUpperCase()} (.${mixerModel === 'x32' ? 'scn' : mixerModel === 'ui24' ? 'show' : 'snap'})`}
           >
             <Usb className="w-4 h-4 text-cyan-400" />
-            <span>.snap soubor</span>
+            <span>.{mixerModel === 'x32' ? 'scn' : mixerModel === 'ui24' ? 'show' : 'snap'}</span>
           </button>
 
           {/* Duplicate */}
@@ -1372,106 +1501,46 @@ export const ScenesManager: React.FC<ScenesManagerProps> = ({ onOpenAppendix, on
       {/* PDF Stage Rider Reader Modal */}
       <StageRiderPdfModal
         isOpen={isPdfModalOpen}
-        onClose={() => setIsPdfModalOpen(false)}
+        onClose={() => {
+          setIsPdfModalOpen(false);
+          setPdfCustomChannels(null);
+        }}
         scene={currentScene}
-        channels={safeChannels}
+        channels={pdfCustomChannels || safeChannels}
       />
 
-      {/* Create New Custom Scene Modal */}
-      {showCreateSceneModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <form onSubmit={handleCreateScene} className="bg-[#161616] border border-white/10 rounded-2xl p-6 max-w-lg w-full shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-white/10 text-white flex items-center justify-center">
-                  <Plus className="w-4 h-4" />
-                </div>
-                <h3 className="text-sm font-bold text-white">Vytvořit novou vlastní scénu pro WING</h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowCreateSceneModal(false)}
-                className="text-white/40 hover:text-white text-xs cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
+      {/* Mixing Station Export Modal (Export Only) */}
+      <MixingStationModal
+        isOpen={isMixingStationModalOpen}
+        onClose={() => setIsMixingStationModalOpen(false)}
+        currentScene={currentScene}
+        mixerModel={mixerModel}
+        onOpenPdfRider={() => {
+          setIsMixingStationModalOpen(false);
+          setPdfCustomChannels(null);
+          setIsPdfModalOpen(true);
+        }}
+      />
 
-            <div className="space-y-3 text-xs">
-              <div>
-                <label className="text-white/60 block mb-1 font-bold">Název scény / kapely:</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="např. Jazz Quintet Live, Letní Festival 24ch"
-                  value={newSceneName}
-                  onChange={(e) => setNewSceneName(e.target.value)}
-                  className="w-full bg-black border border-white/10 rounded-xl px-3.5 py-2 text-white placeholder-white/30 focus:outline-none focus:border-white/40"
-                />
-              </div>
+      {/* AI Scene Audit & Sound Engineer Review Modal */}
+      <SceneAiAuditModal
+        isOpen={isAiAuditModalOpen}
+        onClose={() => setIsAiAuditModalOpen(false)}
+        scene={currentScene}
+        mixerModel={mixerModel}
+        onApplyChanges={handleApplyAuditChanges}
+        onOpenPdfRider={(channelsToPrint) => {
+          setIsAiAuditModalOpen(false);
+          handleOpenPdfWithCustomChannels(channelsToPrint);
+        }}
+      />
 
-              <div>
-                <label className="text-white/60 block mb-1 font-bold">Typ obsazení / Žánr:</label>
-                <select
-                  value={newSceneEnsemble}
-                  onChange={(e) => setNewSceneEnsemble(e.target.value)}
-                  className="w-full bg-black border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-white/40"
-                >
-                  <option value="Rocková kapela">Rocková kapela</option>
-                  <option value="Popová kapela">Popová kapela</option>
-                  <option value="Akustické trio / Folk">Akustické trio / Folk</option>
-                  <option value="Dechový orchestr">Dechový orchestr</option>
-                  <option value="Symfonický orchestr">Symfonický orchestr</option>
-                  <option value="Pěvecký sbor & Kapela">Pěvecký sbor & Kapela</option>
-                  <option value="Konferenční / Mluvené slovo">Konferenční / Mluvené slovo</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-white/60 block mb-1 font-bold">Výchozí šablona kanálů:</label>
-                <select
-                  value={newSceneTemplate}
-                  onChange={(e) => setNewSceneTemplate(e.target.value)}
-                  className="w-full bg-black border border-white/10 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-white/40"
-                >
-                  <option value="scene-rock-24ch">Rocková sestava (24 kanálů)</option>
-                  <option value="scene-pop-32ch">Pop / Modern Worship (32 kanálů)</option>
-                  <option value="scene-orch-40ch">Symfonický orchestr (40 kanálů)</option>
-                  <option value="scene-brass-18ch">Dechový orchestr (18 kanálů)</option>
-                  <option value="scene-vocal-16ch">Pěvecký sbor (16 kanálů)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="text-white/60 block mb-1 font-bold">Popis a poznámky k pódiu:</label>
-                <textarea
-                  rows={2}
-                  placeholder="např. Požadavky na IEM odposlechy, pódiové stageboxy..."
-                  value={newSceneDesc}
-                  onChange={(e) => setNewSceneDesc(e.target.value)}
-                  className="w-full bg-black border border-white/10 rounded-xl px-3.5 py-2 text-white placeholder-white/30 focus:outline-none focus:border-white/40"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-white/10">
-              <button
-                type="button"
-                onClick={() => setShowCreateSceneModal(false)}
-                className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl text-xs font-bold cursor-pointer"
-              >
-                Zrušit
-              </button>
-              <button
-                type="submit"
-                className="px-5 py-2 bg-white hover:bg-gray-200 text-black rounded-xl text-xs font-bold cursor-pointer"
-              >
-                Uložit novou scénu
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+      {/* Central Universal Create & Import Scene Modal */}
+      <CreateSceneModal
+        isOpen={showCreateSceneModal}
+        onClose={() => setShowCreateSceneModal(false)}
+        onSceneCreatedOrImported={handleSceneCreatedOrImported}
+      />
 
       {/* Add / Edit Channel Modal */}
       {showAddChannelModal && (

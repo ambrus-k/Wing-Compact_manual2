@@ -56,16 +56,24 @@ export const GitHubExportModal: React.FC<GitHubExportModalProps> = ({ isOpen, on
           </div>
           
           <div className="space-y-4 pt-4 border-t border-white/10">
-            <h3 className="text-white font-bold text-base">Jak vynutit nasazení (Deployment) na Vercelu</h3>
-            <p className="text-white/80 leading-relaxed">
-              Pokud jsi repozitář na Vercel úspěšně napojil, ale <strong>nespustil se automaticky první build</strong>, máš dvě možnosti:
+            <h3 className="text-white font-bold text-base flex items-center gap-2 text-cyan-400">
+              <span>Jak bezpečně zapnout Gemini AI na Vercelu i v tabletu</span>
+            </h3>
+            <p className="text-white/80 leading-relaxed text-xs">
+              Váš Google API klíč <strong>nikdy nepatří do veřejného kódu na GitHubu</strong>. Naše aplikace má vytvořený serverový endpoint <code>/api/audit-scene.ts</code>, který funguje jako Vercel Serverless Function. Klíč nastavíte v administraci Vercelu a do tabletu se klíč vůbec nedostane:
             </p>
-            <ol className="space-y-4 list-decimal list-inside text-white/80 marker:text-white/40">
-              <li className="pl-2">
-                <strong className="text-white">Přes Vercel nástěnku (Manuálně):</strong> Ve Vercelu otevři svůj projekt, jdi do záložky <strong>Deployments</strong>. Pokud tam vidíš starý deployment, klikni na tři tečky vpravo (<code>...</code>) a zvol <strong>Redeploy</strong>.
+            <ol className="space-y-2 list-decimal list-inside text-white/80 text-xs">
+              <li className="pl-1">
+                Ve Vercelu otevřete projekt ➔ <strong>Settings</strong> ➔ <strong>Environment Variables</strong>.
               </li>
-              <li className="pl-2">
-                <strong className="text-white">Úpravou v AI Studiu (Automaticky):</strong> Vercel poslouchá změny na GitHubu. Tím, že jsem právě teď přidal tento text o Vercelu do aplikace, <strong>automaticky se odeslal nový kód na GitHub</strong>. Tato změna by měla v tuto chvíli už sama <strong>vyvolat nový deployment na Vercelu!</strong> Můžeš to zkontrolovat na svém Vercel účtu.
+              <li className="pl-1">
+                Zadejte název: <strong>GEMINI_API_KEY</strong> a do hodnoty vložte svůj klíč z Google AI Studia (<code>AIzaSy...</code>).
+              </li>
+              <li className="pl-1">
+                Zaškrtněte <strong>Production</strong>, <strong>Preview</strong> a <strong>Development</strong> a uložte.
+              </li>
+              <li className="pl-1">
+                V záložce <strong>Deployments</strong> klikněte u posledního nasazení na <strong>Redeploy</strong>. Od té chvíle běží AI Audit i z nainstalované PWA na tabletu!
               </li>
             </ol>
           </div>

@@ -1,3 +1,32 @@
+export type MixerId = 'wing' | 'x32' | 'ui24';
+
+export interface MixerConfig {
+  id: MixerId;
+  name: string;
+  fullName: string;
+  brand: string;
+  model: string;
+  badge: string;
+  color: string;
+  borderColor: string;
+  accentBg: string;
+  tagline: string;
+  firmware: string;
+  specs: {
+    channels: string;
+    preamps: string;
+    outputs: string;
+    buses: string;
+    faders: string;
+    screen: string;
+    dsp: string;
+    recording: string;
+  };
+  pdfUrl?: string;
+  pdfTitle?: string;
+  highlights: string[];
+}
+
 export type NavigationTab = 'manual' | 'presets' | 'scenes' | 'diagnostics' | 'hardware' | 'microphones';
 
 export interface ManualSubsection {
@@ -268,3 +297,28 @@ export interface Microphone {
   description: string;
   imageUrl: string;
 }
+
+export type AuditSeverity = 'critical' | 'recommended' | 'refinement';
+export type AuditCategory = 'gain_staging' | 'eq_clean' | 'dynamics' | 'safety' | 'routing';
+
+export interface AuditSuggestion {
+  id: string;
+  chNum: number;
+  channelName: string;
+  parameter: 'gain' | 'hpf' | 'phantom48V' | 'phase' | 'gate' | 'eq' | 'comp' | 'dca' | 'fader';
+  currentValue: string;
+  suggestedValue: string;
+  patchField: 'gainDb' | 'phantom48V' | 'phaseInvert' | 'gateOn' | 'gateModel' | 'eqModel' | 'compOn' | 'compModel' | 'dcaGroup' | 'faderDb';
+  patchValue: any;
+  reason: string;
+  category: AuditCategory;
+  severity: AuditSeverity;
+  status: 'pending' | 'accepted' | 'rejected';
+}
+
+export interface AuditReport {
+  overallAssessment: string;
+  healthScore: number;
+  suggestions: AuditSuggestion[];
+}
+

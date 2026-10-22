@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { InstrumentPreset } from '../types';
+import { InstrumentPreset, MixerId } from '../types';
 import { INSTRUMENT_PRESETS } from '../data/presetsData';
 import { VisualEQCurve } from './VisualEQCurve';
 import { VisualCompTransfer } from './VisualCompTransfer';
@@ -27,14 +27,17 @@ import {
   Volume1,
   X,
   Layers,
-  Filter
+  Filter,
+  Maximize2
 } from 'lucide-react';
 import { playSineTone, playPinkNoise, stopTestSignal } from '../utils/audioDiagnostics';
+import { PresetDetailModal } from './PresetDetailModal';
 
 interface PresetsLabProps {
   onSaveToScenes?: (preset: InstrumentPreset) => void;
   onOpenAppendix?: () => void;
   initialPresetId?: string;
+  activeMixerId?: MixerId;
 }
 
 // Helper to determine the instrument subgroup within each family
@@ -105,7 +108,15 @@ export const getPresetSubGroup = (preset: InstrumentPreset): string => {
   return preset.categoryLabel;
 };
 
-export const PresetsLab: React.FC<PresetsLabProps> = ({ onSaveToScenes, onOpenAppendix, initialPresetId }) => {
+export const PresetsLab: React.FC<PresetsLabProps> = ({ 
+  onSaveToScenes, 
+  onOpenAppendix, 
+  initialPresetId,
+  activeMixerId = 'wing'
+}) => {
+  const preampLabel = activeMixerId === 'ui24' ? 'STUDER MIC GAIN' : activeMixerId === 'x32' ? 'MIDAS PREAMP GAIN' : 'MIDAS PRO GAIN';
+  const consoleBadge = activeMixerId === 'x32' ? 'X32 / M32' : activeMixerId === 'ui24' ? 'Ui24R' : 'WING COMPACT';
+  const consoleFullName = activeMixerId === 'x32' ? 'BEHRINGER X32' : activeMixerId === 'ui24' ? 'SOUNDCRAFT Ui24R' : 'BEHRINGER WING COMPACT';
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedSubGroup, setSelectedSubGroup] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -127,6 +138,7 @@ export const PresetsLab: React.FC<PresetsLabProps> = ({ onSaveToScenes, onOpenAp
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [activeTestSound, setActiveTestSound] = useState<'sine' | 'noise' | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState<boolean>(false);
 
   // 9 Exact acoustic instrument families
   const categories = useMemo(() => [
@@ -236,10 +248,11 @@ export const PresetsLab: React.FC<PresetsLabProps> = ({ onSaveToScenes, onOpenAp
   }, [nextPreset, prevPreset]);
 
   const handleCopyPreset = (preset: InstrumentPreset) => {
-    const textData = `=== BEHRINGER WING COMPACT PRESET ===
+    const textData = `=== ${consoleFullName} PRESET ===
 Nástroj: ${preset.name} (${preset.categoryLabel})
 Skupina: ${getPresetSubGroup(preset)}
-Vstup: ${preset.recommendedInput} | Gain: +${preset.preampGain} dB | 48V: ${preset.phantomPower ? 'ON' : 'OFF'}
+Předzesilovač (${preampLabel}): +${preset.preampGain} dB | 48V: ${preset.phantomPower ? 'ON' : 'OFF'}
+Vstup: ${preset.recommendedInput}
 GATE: ${preset.gate.enabled ? `${preset.gate.model} (Thresh: ${preset.gate.threshold} dB, Ratio: ${preset.gate.ratio}, Att: ${preset.gate.attack}ms, Rel: ${preset.gate.release}ms)` : 'Bypass'}
 EQ: ${preset.eq.model} (HPF: ${preset.eq.hpfFreq} Hz ${preset.eq.hpfSlope})
 COMPRESSOR: ${preset.comp.model} (Thresh: ${preset.comp.threshold} dB, Ratio: ${preset.comp.ratio}, Att: ${preset.comp.attack}, Rel: ${preset.comp.release}, Make-up: +${preset.comp.makeUpGain} dB)
@@ -378,7 +391,7 @@ Tipy: ${preset.proTips.join(' | ')}`;
         <div className="w-full md:w-[280px] lg:w-[320px] flex-shrink-0 space-y-2 md:sticky md:top-[80px] md:h-[calc(100vh-100px)] overflow-y-auto pr-1">
           <div className="text-xs font-semibold text-white/50 uppercase tracking-wider px-1 flex items-center justify-between pb-1">
             <span>Nástroje v kategorii ({filteredPresets.length})</span>
-            <span className="font-mono text-white/40">WING COMPACT</span>
+            <span className="font-mono text-white/40">{consoleBadge}</span>
           </div>
 
           {filteredPresets.length === 0 ? (
@@ -409,8 +422,11 @@ Tipy: ${preset.proTips.join(' | ')}`;
                       return (
                         <div
                           key={preset.id}
-                          onClick={() => setSelectedPresetId(preset.id)}
-                          className={`p-3.5 sm:p-4 rounded-xl border transition-all cursor-pointer select-none text-left relative overflow-hidden ${
+                          onClick={() => {
+                            setSelectedPresetId(preset.id);
+                            setIsDetailModalOpen(true);
+                          }}
+                          className={`p-3.5 sm:p-4 rounded-xl border transition-all cursor-pointer select-none text-left relative overflow-hidden group ${
                             isSelected
                               ? 'bg-[#1e1e1e] border-white/40 shadow-xl shadow-black/50'
                               : 'bg-[#121212] border-white/5 hover:bg-[#161616] hover:border-white/20'
@@ -431,7 +447,7 @@ Tipy: ${preset.proTips.join(' | ')}`;
                                 {getIconComponent(preset.icon)}
                               </div>
                               <div>
-                                <h4 className="text-sm font-bold text-white leading-snug">
+                                <h4 className="text-sm font-bold text-white leading-snug group-hover:text-cyan-300 transition-colors">
                                   {preset.name}
                                 </h4>
                                 <span className="text-[11px] text-white/50">
@@ -449,10 +465,16 @@ Tipy: ${preset.proTips.join(' | ')}`;
                             {preset.description}
                           </p>
 
-                          <div className="flex items-center gap-2 mt-2.5 pt-2 border-t border-white/5 text-[11px] font-mono text-white/60">
-                            <span className="text-white/80 font-medium">EQ: {preset.eq.model}</span>
-                            <span className="text-white/20">•</span>
-                            <span className="text-cyan-400 font-medium">COMP: {preset.comp.model.split(' ')[0]}</span>
+                          <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-white/5 text-[11px] font-mono">
+                            <div className="flex items-center gap-1.5 text-white/60 truncate mr-2">
+                              <span className="text-white/80 font-medium">EQ: {preset.eq.model}</span>
+                              <span className="text-white/20">•</span>
+                              <span className="text-cyan-400 font-medium truncate">COMP: {preset.comp.model.split(' ')[0]}</span>
+                            </div>
+                            <div className="flex items-center gap-1 text-[10px] text-cyan-400 font-sans font-semibold bg-cyan-950/40 px-2 py-0.5 rounded border border-cyan-500/25 shrink-0 group-hover:bg-cyan-500/20 group-hover:border-cyan-400 transition-all">
+                              <Maximize2 className="w-2.5 h-2.5" />
+                              <span>Nastavení</span>
+                            </div>
                           </div>
                         </div>
                       );
@@ -546,7 +568,17 @@ Tipy: ${preset.proTips.join(' | ')}`;
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Pop-up modal button for tablet/full-screen detail */}
+                <button
+                  onClick={() => setIsDetailModalOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-cyan-600/25 hover:bg-cyan-600/40 text-cyan-300 border border-cyan-500/30 transition-all cursor-pointer active:scale-95 shadow-sm"
+                  title="Otevřít podrobné doporučené nastavení v samostatném okně"
+                >
+                  <Maximize2 className="w-3.5 h-3.5" />
+                  <span>Doporučené nastavení</span>
+                </button>
+
                 {/* Audio Test button */}
                 <button
                   onClick={() => handleToggleSound('sine')}
@@ -585,7 +617,7 @@ Tipy: ${preset.proTips.join(' | ')}`;
             {/* Hardware Preamplifier & Input Strip */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-4 text-xs font-mono">
               <div className="bg-[#000000] p-2.5 rounded-xl border border-white/10">
-                <span className="text-[10px] text-white/40 block uppercase">MIDAS PRO GAIN</span>
+                <span className="text-[10px] text-white/40 block uppercase">{preampLabel}</span>
                 <span className="text-sm font-bold text-white">+{currentPreset.preampGain} dB</span>
               </div>
               <div className="bg-[#000000] p-2.5 rounded-xl border border-white/10">
@@ -877,6 +909,25 @@ Tipy: ${preset.proTips.join(' | ')}`;
           </div>
         </div>
       </div>
+
+      {/* Pop-up modal with detailed recommended settings for Android tablet / mobile / desktop */}
+      <PresetDetailModal
+        preset={currentPreset}
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        onNext={nextPreset ? () => handlePresetNavigation(nextPreset.id) : undefined}
+        onPrev={prevPreset ? () => handlePresetNavigation(prevPreset.id) : undefined}
+        hasNext={Boolean(nextPreset)}
+        hasPrev={Boolean(prevPreset)}
+        currentIndex={safeCurrentIndex}
+        totalCount={filteredPresets.length}
+        copied={copiedId === currentPreset.id}
+        onCopy={handleCopyPreset}
+        activeTestSound={activeTestSound}
+        onToggleSound={handleToggleSound}
+        onSaveToScenes={onSaveToScenes}
+        activeMixerId={activeMixerId}
+      />
     </div>
   );
 };

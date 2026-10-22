@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MANUAL_CHAPTERS } from '../data/manualData';
+import { MANUAL_CHAPTERS_X32 } from '../data/manualDataX32';
+import { MANUAL_CHAPTERS_UI24 } from '../data/manualDataUi24';
 import { INSTRUMENT_PRESETS } from '../data/presetsData';
-import { NavigationTab } from '../types';
+import { NavigationTab, MixerId } from '../types';
 import { 
   Search, 
   BookOpen, 
@@ -11,12 +13,17 @@ import {
   ArrowRight, 
   X,
   Layers,
-  Activity
+  Activity,
+  SlidersHorizontal,
+  Wifi,
+  Radio
 } from 'lucide-react';
 
 interface SearchModalProps {
   isOpen: boolean;
   onClose: () => void;
+  activeMixerId: MixerId;
+  onSelectMixer?: (mixerId: MixerId) => void;
   onSelectManualSection: (chapterId: string, subsectionId: string) => void;
   onSelectPreset: (presetId: string) => void;
   onSelectTab: (tab: NavigationTab) => void;
@@ -25,6 +32,7 @@ interface SearchModalProps {
 interface SearchResultItem {
   id: string;
   type: 'manual' | 'preset' | 'shortcut' | 'fx';
+  mixerId?: MixerId;
   title: string;
   subtitle: string;
   category: string;
@@ -35,12 +43,14 @@ interface SearchResultItem {
 export const SearchModal: React.FC<SearchModalProps> = ({
   isOpen,
   onClose,
+  activeMixerId,
+  onSelectMixer,
   onSelectManualSection,
   onSelectPreset,
   onSelectTab
 }) => {
   const [query, setQuery] = useState('');
-  const [selectedType, setSelectedType] = useState<string>('all');
+  const [selectedFilter, setSelectedFilter] = useState<'all' | 'active' | 'x32' | 'ui24' | 'wing' | 'preset'>('all');
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -71,30 +81,42 @@ export const SearchModal: React.FC<SearchModalProps> = ({
   const results: SearchResultItem[] = [];
   const q = query.toLowerCase().trim();
 
-  // 1. Search Manual Subsections
-  MANUAL_CHAPTERS.forEach(ch => {
-    ch.subsections.forEach(sub => {
-      if (
-        !q ||
-        sub.title.toLowerCase().includes(q) ||
-        sub.summary.toLowerCase().includes(q) ||
-        sub.content.toLowerCase().includes(q) ||
-        ch.title.toLowerCase().includes(q)
-      ) {
-        results.push({
-          id: `sub-${sub.id}`,
-          type: 'manual',
-          title: sub.title,
-          subtitle: `${ch.title} • ${sub.summary}`,
-          category: `Kapitola ${ch.number}`,
-          action: () => {
-            onSelectManualSection(ch.id, sub.id);
-            onClose();
-          }
-        });
-      }
+  // Helper to index manual chapters
+  const indexManual = (chapters: typeof MANUAL_CHAPTERS, mixer: MixerId, label: string) => {
+    chapters.forEach(ch => {
+      ch.subsections.forEach(sub => {
+        if (
+          !q ||
+          sub.title.toLowerCase().includes(q) ||
+          sub.summary.toLowerCase().includes(q) ||
+          sub.content.toLowerCase().includes(q) ||
+          ch.title.toLowerCase().includes(q) ||
+          label.toLowerCase().includes(q)
+        ) {
+          results.push({
+            id: `${mixer}-sub-${sub.id}`,
+            type: 'manual',
+            mixerId: mixer,
+            title: sub.title,
+            subtitle: `${label} • Kapitola ${ch.number}: ${ch.title} • ${sub.summary}`,
+            category: label,
+            action: () => {
+              if (onSelectMixer) {
+                onSelectMixer(mixer);
+              }
+              onSelectManualSection(ch.id, sub.id);
+              onClose();
+            }
+          });
+        }
+      });
     });
-  });
+  };
+
+  // 1. Index All 3 Consoles
+  indexManual(MANUAL_CHAPTERS, 'wing', 'WING Compact');
+  indexManual(MANUAL_CHAPTERS_X32, 'x32', 'X32 Producer');
+  indexManual(MANUAL_CHAPTERS_UI24, 'ui24', 'Soundcraft Ui24R');
 
   // 2. Search Instrument & Vocal Presets
   INSTRUMENT_PRESETS.forEach(p => {
@@ -120,141 +142,138 @@ export const SearchModal: React.FC<SearchModalProps> = ({
     }
   });
 
-  // 3. Search Key Shortcuts
-  const shortcutKeywords = ['ghost', 'touch', 'reset', 'boot', 'emergency', 'lock', 'surface', 'screenshot', 'heslo', 'zkratk'];
-  if (!q || shortcutKeywords.some(k => q.includes(k))) {
-    results.push({
-      id: 'shortcut-touch-reset',
-      type: 'shortcut',
-      title: 'Reset dotykového panelu (Ghost touch fix)',
-      subtitle: 'Podržte prázdné tlačítko u displeje a CLR SOLO na >1.5 sekundy.',
-      category: 'Servisní zkratka',
-      action: () => {
-        onSelectManualSection('ch-10-shortcuts-troubleshooting', '10-1-hardware-shortcuts');
-        onClose();
-      }
-    });
-    results.push({
-      id: 'shortcut-emergency-boot',
-      type: 'shortcut',
-      title: 'Nouzový režim spuštění (Emergency Boot)',
-      subtitle: 'Při zapínání pultu držte prázdné tlačítko pro přístup k WING OS disku z počítače.',
-      category: 'Servisní zkratka',
-      action: () => {
-        onSelectManualSection('ch-10-shortcuts-troubleshooting', '10-1-hardware-shortcuts');
-        onClose();
-      }
-    });
-  }
-
+  // Filter results based on selectedFilter
   const filteredResults = results.filter(item => {
-    if (selectedType === 'all') return true;
-    return item.type === selectedType;
+    if (selectedFilter === 'all') return true;
+    if (selectedFilter === 'active') return item.mixerId === activeMixerId;
+    if (selectedFilter === 'wing') return item.mixerId === 'wing';
+    if (selectedFilter === 'x32') return item.mixerId === 'x32';
+    if (selectedFilter === 'ui24') return item.mixerId === 'ui24';
+    if (selectedFilter === 'preset') return item.type === 'preset';
+    return true;
   });
 
-  const getResultIcon = (type: string) => {
-    switch (type) {
-      case 'manual': return <BookOpen className="w-4 h-4 text-amber-400" />;
-      case 'preset': return <Sliders className="w-4 h-4 text-cyan-400" />;
-      case 'shortcut': return <Zap className="w-4 h-4 text-emerald-400" />;
-      default: return <Sparkles className="w-4 h-4 text-purple-400" />;
-    }
-  };
-
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-start justify-center p-4 sm:p-6 md:p-12 animate-in fade-in duration-150">
-      <div className="bg-[#121212] border border-white/10 rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+    <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 px-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-[#121418] border border-white/20 rounded-2xl w-full max-w-3xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
         {/* Search Input Bar */}
-        <div className="p-4 border-b border-white/10 flex items-center gap-3 bg-[#000000]">
-          <Search className="w-5 h-5 text-white/60 shrink-0" />
+        <div className="relative border-b border-white/10 p-4 flex items-center gap-3">
+          <Search className="w-5 h-5 text-white/50 shrink-0" />
           <input
             ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && filteredResults.length > 0) {
-                e.preventDefault();
-                filteredResults[0].action();
-              }
-            }}
-            placeholder="Hledat funkci v manuálu WING (např. Gate, EQ, Talkback, RTA, DCA, ghost touch)..."
-            className="w-full bg-transparent text-sm text-white placeholder-white/40 focus:outline-none font-sans"
+            placeholder="Hledat napříč WING, X32 Producer, Ui24R, presety, routing..."
+            className="w-full bg-transparent text-base text-white placeholder-white/40 focus:outline-none"
           />
           {query && (
             <button
               onClick={() => setQuery('')}
-              className="text-white/40 hover:text-white text-xs p-1 cursor-pointer"
+              className="text-white/40 hover:text-white p-1 cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
           )}
-          <kbd className="hidden sm:inline text-[10px] bg-white/5 px-2.5 py-1 rounded text-white/40 border border-white/10 font-mono">
+          <button
+            onClick={onClose}
+            className="text-xs font-mono text-white/40 hover:text-white px-2 py-1 bg-white/5 rounded border border-white/10"
+          >
             ESC
-          </kbd>
+          </button>
         </div>
 
         {/* Filter Pills */}
-        <div className="px-4 py-2.5 border-b border-white/5 bg-[#0a0a0a] flex items-center gap-1.5 overflow-x-auto text-xs">
-          {[
-            { id: 'all', label: 'Vše' },
-            { id: 'manual', label: 'Manuál' },
-            { id: 'preset', label: 'Zvukové Presety' },
-            { id: 'shortcut', label: 'Klávesové zkratky' }
-          ].map(f => (
-            <button
-              key={f.id}
-              onClick={() => setSelectedType(f.id)}
-              className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all cursor-pointer ${
-                selectedType === f.id
-                  ? 'bg-white text-black font-bold shadow-md'
-                  : 'bg-white/5 text-white/50 hover:text-white border border-white/10'
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-          <span className="ml-auto text-[10px] font-mono text-white/40">
-            {filteredResults.length} výsledků
-          </span>
+        <div className="px-4 py-2 bg-black/40 border-b border-white/5 flex flex-wrap items-center gap-1.5 text-xs">
+          <span className="text-white/40 text-[11px] mr-1">Filtrovat:</span>
+          <button
+            onClick={() => setSelectedFilter('all')}
+            className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${
+              selectedFilter === 'all' ? 'bg-white text-black font-bold' : 'text-white/60 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            Vše ({results.length})
+          </button>
+          <button
+            onClick={() => setSelectedFilter('active')}
+            className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${
+              selectedFilter === 'active' ? 'bg-emerald-400 text-black font-bold' : 'text-white/60 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            Aktivní pult ({results.filter(r => r.mixerId === activeMixerId).length})
+          </button>
+          <button
+            onClick={() => setSelectedFilter('x32')}
+            className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${
+              selectedFilter === 'x32' ? 'bg-sky-500 text-black font-bold' : 'text-sky-300/80 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            X32 Producer
+          </button>
+          <button
+            onClick={() => setSelectedFilter('ui24')}
+            className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${
+              selectedFilter === 'ui24' ? 'bg-cyan-400 text-black font-bold' : 'text-cyan-300/80 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            Soundcraft Ui24R
+          </button>
+          <button
+            onClick={() => setSelectedFilter('wing')}
+            className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${
+              selectedFilter === 'wing' ? 'bg-amber-500 text-black font-bold' : 'text-amber-300/80 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            WING Compact
+          </button>
+          <button
+            onClick={() => setSelectedFilter('preset')}
+            className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${
+              selectedFilter === 'preset' ? 'bg-purple-400 text-black font-bold' : 'text-purple-300/80 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            Presety
+          </button>
         </div>
 
-        {/* Search Results List */}
-        <div className="p-2 overflow-y-auto space-y-1 divide-y divide-white/5">
-          {filteredResults.length > 0 ? (
+        {/* Results List */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-1.5 custom-scrollbar">
+          {filteredResults.length === 0 ? (
+            <div className="py-12 text-center text-white/40 space-y-2">
+              <Search className="w-8 h-8 mx-auto opacity-30" />
+              <p className="text-sm">Nenalezeny žádné záznamy pro dotaz "{query}"</p>
+              <p className="text-xs text-white/30">Zkuste zadat např. "Preamp", "Sends on Fader", "Cascade", "Lexicon", "AES50", "DCA"</p>
+            </div>
+          ) : (
             filteredResults.map(item => (
               <div
                 key={item.id}
                 onClick={item.action}
-                className="p-3 rounded-xl hover:bg-white/5 cursor-pointer transition-colors group flex items-center justify-between gap-3 text-left"
+                className="p-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.08] border border-white/5 hover:border-white/20 transition-all cursor-pointer group flex items-center justify-between gap-3"
               >
-                <div className="flex items-start gap-3">
-                  <div className="mt-0.5 p-2 rounded-lg bg-[#000000] border border-white/10">
-                    {getResultIcon(item.type)}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-black border border-white/10 text-white/70">
+                      {item.category}
+                    </span>
+                    <h4 className="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors truncate">
+                      {item.title}
+                    </h4>
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-xs font-bold text-white group-hover:text-white/90 transition-colors">
-                        {item.title}
-                      </h4>
-                      <span className="text-[10px] font-mono px-2 py-0.2 bg-black text-white/40 rounded-full border border-white/10">
-                        {item.category}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-gray-400 line-clamp-1 mt-0.5">
-                      {item.subtitle}
-                    </p>
-                  </div>
+                  <p className="text-xs text-white/50 mt-1 line-clamp-1">
+                    {item.subtitle}
+                  </p>
                 </div>
-
-                <ArrowRight className="w-4 h-4 text-white/30 group-hover:text-white group-hover:translate-x-0.5 transition-all shrink-0" />
+                <ArrowRight className="w-4 h-4 text-white/30 group-hover:text-white group-hover:translate-x-1 transition-all shrink-0" />
               </div>
             ))
-          ) : (
-            <div className="py-12 text-center text-xs text-white/40">
-              Žádné výsledky pro dotaz "{query}". Zkuste hledat "routing", "tap", "vocal", "kopák", "gate", "firmware" nebo "ghost".
-            </div>
           )}
+        </div>
+
+        {/* Search Footer */}
+        <div className="p-3 bg-black/60 border-t border-white/10 text-[11px] font-mono text-white/40 flex items-center justify-between">
+          <span>Stiskem šipek procházíte, Enterem otevřete, ESC zavřete</span>
+          <span>Nalezeno {filteredResults.length} výsledků</span>
         </div>
       </div>
     </div>

@@ -989,3 +989,17 @@ Tato aplikace kombinuje **výkonný offline návrhový a školicí nástroj** s 
     ]
   }
 ];
+
+import { MANUAL_CHAPTERS_X32 } from './manualDataX32';
+import { MANUAL_CHAPTERS_UI24 } from './manualDataUi24';
+import { MixerId } from '../types';
+
+export const MANUALS_BY_MIXER: Record<MixerId, ManualChapter[]> = {
+  wing: MANUAL_CHAPTERS,
+  x32: MANUAL_CHAPTERS_X32,
+  ui24: MANUAL_CHAPTERS_UI24
+};
+
+export const getManualChapters = (mixerId: MixerId): ManualChapter[] => {
+  return MANUALS_BY_MIXER[mixerId] || MANUAL_CHAPTERS;
+};

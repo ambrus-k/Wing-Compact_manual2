@@ -366,3 +366,276 @@ export const INITIAL_SCENES: SavedScene[] = [
     ]
   }
 ];
+
+export const INITIAL_SCENES_WING = INITIAL_SCENES;
+
+export const INITIAL_SCENES_X32: SavedScene[] = [
+  {
+    id: 'scene-x32-band-brabec',
+    name: 'X32 Live Band: S Brabcem (32CH)',
+    type: 'snapshot',
+    createdAt: '2026-08-10T10:00:00Z',
+    updatedAt: '2026-09-01T12:00:00Z',
+    tags: ['X32', 'M32', 'Band', 'Official Dump', '32ch'],
+    description: 'Oficiální živá scéna pro Behringer X32 / M32: 32 stop (Zpěvy Pavel, Brabec, Klára, Karel, dechy SAXY, bicí, baskytara, kytary, klávesy), 8 Auxů, 16 sběrnic a 8 DCA.',
+    favorite: true,
+    channelCount: 32,
+    scope: {
+      channels: true,
+      aux: true,
+      buses: true,
+      mains: true,
+      matrix: true,
+      eq: true,
+      dyn: true,
+      gate: true,
+      fx: true,
+      routing: true,
+      dca: true,
+      muteGroups: true
+    },
+    details: {
+      targetEnsemble: 'X32 / M32 Pop-Rock Band (S Brabcem)',
+      faderLayerPreset: 'CH 1-16: Zpěvy & Rytmika | CH 17-32: Bicí & Linky',
+      mainFaderAssign: 'Main Stereo L/R',
+      customControlsProfile: 'FOH & Monitor Standard (X32)',
+      notes: 'Midas předzesilovače s přesným analogovým gainem, 16 mix sběrnic pro odposlechy a 8 DCA skupin.'
+    },
+    channels: [
+      { chNum: 1, name: 'Pavel', sourceInput: 'Local In 1 (XLR)', gainDb: 32, phantom48V: false, phaseInvert: false, color: 'cyan', icon: 'Mic', faderDb: 0.0, pan: 0, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'X32 4-Band Parametric EQ', compOn: true, compModel: 'X32 Channel Comp', dcaGroup: 1 },
+      { chNum: 2, name: 'Brabec', sourceInput: 'Local In 2 (XLR)', gainDb: 34, phantom48V: false, phaseInvert: false, color: 'cyan', icon: 'Mic', faderDb: 1.0, pan: 0, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'X32 4-Band Parametric EQ', compOn: true, compModel: 'X32 Channel Comp', dcaGroup: 1 },
+      { chNum: 3, name: 'Klara', sourceInput: 'Local In 3 (XLR)', gainDb: 32, phantom48V: false, phaseInvert: false, color: 'cyan', icon: 'Mic', faderDb: 0.5, pan: 0, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'X32 4-Band Parametric EQ', compOn: true, compModel: 'X32 Channel Comp', dcaGroup: 1 },
+      { chNum: 4, name: 'Karel', sourceInput: 'Local In 4 (XLR)', gainDb: 30, phantom48V: false, phaseInvert: false, color: 'cyan', icon: 'Mic', faderDb: -1.0, pan: 0, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'X32 4-Band Parametric EQ', compOn: true, compModel: 'X32 Channel Comp', dcaGroup: 1 },
+      { chNum: 5, name: 'SAXY', sourceInput: 'Local In 5 (XLR)', gainDb: 28, phantom48V: false, phaseInvert: false, color: 'magenta', icon: 'Music', faderDb: 0.0, pan: -20, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'X32 4-Band Parametric EQ', compOn: true, compModel: 'X32 Channel Comp', dcaGroup: 2 },
+      { chNum: 6, name: 'E Karel', sourceInput: 'Local In 6 (XLR)', gainDb: 26, phantom48V: false, phaseInvert: false, color: 'yellow', icon: 'Guitar', faderDb: -1.5, pan: -50, muted: false, solo: false, gateOn: true, gateModel: 'X32 Expander/Gate', eqModel: 'X32 4-Band Parametric EQ', compOn: false, compModel: 'Bypass', dcaGroup: 2 },
+      { chNum: 7, name: 'E Brab', sourceInput: 'Local In 7 (XLR)', gainDb: 26, phantom48V: false, phaseInvert: false, color: 'yellow', icon: 'Guitar', faderDb: -1.5, pan: 50, muted: false, solo: false, gateOn: true, gateModel: 'X32 Expander/Gate', eqModel: 'X32 4-Band Parametric EQ', compOn: false, compModel: 'Bypass', dcaGroup: 2 },
+      { chNum: 8, name: 'AC kytara', sourceInput: 'Local In 8 (XLR)', gainDb: 28, phantom48V: true, phaseInvert: false, color: 'yellow', icon: 'Acoustic', faderDb: -2.0, pan: -15, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'X32 4-Band Parametric EQ', compOn: true, compModel: 'X32 Channel Comp', dcaGroup: 2 },
+      { chNum: 9, name: 'Klav L', sourceInput: 'Local In 9 (XLR)', gainDb: 18, phantom48V: false, phaseInvert: false, color: 'green', icon: 'Keys', faderDb: -3.0, pan: -70, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'X32 4-Band Parametric EQ', compOn: false, compModel: 'Bypass', dcaGroup: 2 },
+      { chNum: 10, name: 'Klav R', sourceInput: 'Local In 10 (XLR)', gainDb: 18, phantom48V: false, phaseInvert: false, color: 'green', icon: 'Keys', faderDb: -3.0, pan: 70, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'X32 4-Band Parametric EQ', compOn: false, compModel: 'Bypass', dcaGroup: 2 },
+      { chNum: 11, name: 'Bass', sourceInput: 'Local In 11 (XLR)', gainDb: 24, phantom48V: false, phaseInvert: false, color: 'blue', icon: 'Bass', faderDb: 0.0, pan: 0, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'X32 4-Band Parametric EQ', compOn: true, compModel: 'X32 Channel Comp', dcaGroup: 3 },
+      { chNum: 12, name: 'BassDrum', sourceInput: 'Local In 12 (XLR)', gainDb: 22, phantom48V: false, phaseInvert: false, color: 'orange', icon: 'Drum', faderDb: 0.0, pan: 0, muted: false, solo: false, gateOn: true, gateModel: 'X32 Expander/Gate', eqModel: 'X32 4-Band Parametric EQ', compOn: true, compModel: 'X32 Channel Comp', dcaGroup: 4 },
+      { chNum: 13, name: 'SnareDrum', sourceInput: 'Local In 13 (XLR)', gainDb: 24, phantom48V: false, phaseInvert: false, color: 'orange', icon: 'Drum', faderDb: -1.0, pan: 0, muted: false, solo: false, gateOn: true, gateModel: 'X32 Expander/Gate', eqModel: 'X32 4-Band Parametric EQ', compOn: true, compModel: 'X32 Channel Comp', dcaGroup: 4 },
+      { chNum: 14, name: 'Hi-Hat', sourceInput: 'Local In 14 (XLR)', gainDb: 20, phantom48V: true, phaseInvert: false, color: 'orange', icon: 'Cymbal', faderDb: -5.0, pan: -30, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'X32 4-Band Parametric EQ (HPF 350Hz)', compOn: false, compModel: 'Bypass', dcaGroup: 4 },
+      { chNum: 15, name: 'Tom 1', sourceInput: 'Local In 15 (XLR)', gainDb: 26, phantom48V: false, phaseInvert: false, color: 'orange', icon: 'Tom', faderDb: -2.0, pan: -25, muted: false, solo: false, gateOn: true, gateModel: 'X32 Expander/Gate', eqModel: 'X32 4-Band Parametric EQ', compOn: true, compModel: 'X32 Channel Comp', dcaGroup: 4 },
+      { chNum: 16, name: 'Tom 2', sourceInput: 'Local In 16 (XLR)', gainDb: 26, phantom48V: false, phaseInvert: false, color: 'orange', icon: 'Tom', faderDb: -2.0, pan: 25, muted: false, solo: false, gateOn: true, gateModel: 'X32 Expander/Gate', eqModel: 'X32 4-Band Parametric EQ', compOn: true, compModel: 'X32 Channel Comp', dcaGroup: 4 },
+      { chNum: 17, name: 'Overhead L', sourceInput: 'AES50-A 1 (XLR)', gainDb: 30, phantom48V: true, phaseInvert: false, color: 'yellow', icon: 'Cymbal', faderDb: -4.0, pan: -75, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'X32 4-Band Parametric EQ', compOn: false, compModel: 'Bypass', dcaGroup: 4 },
+      { chNum: 18, name: 'Overhead R', sourceInput: 'AES50-A 2 (XLR)', gainDb: 30, phantom48V: true, phaseInvert: false, color: 'yellow', icon: 'Cymbal', faderDb: -4.0, pan: 75, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'X32 4-Band Parametric EQ', compOn: false, compModel: 'Bypass', dcaGroup: 4 }
+    ],
+    buses: [
+      { busNum: 1, name: 'IEM Pavel (Stereo)', isStereo: true, role: 'IEM Monitor', faderDb: 0.0, color: 'cyan', pan: 0 },
+      { busNum: 3, name: 'IEM Brabec (Stereo)', isStereo: true, role: 'IEM Monitor', faderDb: 0.0, color: 'cyan', pan: 0 },
+      { busNum: 5, name: 'IEM Klara (Stereo)', isStereo: true, role: 'IEM Monitor', faderDb: 0.0, color: 'cyan', pan: 0 },
+      { busNum: 7, name: 'Wedge Kytary', isStereo: false, role: 'Wedge Monitor', faderDb: -2.0, color: 'yellow', pan: 0 },
+      { busNum: 9, name: 'Wedge Basa/Bicí', isStereo: false, role: 'Wedge Monitor', faderDb: 0.0, color: 'orange', pan: 0 },
+      { busNum: 13, name: 'FX 1 Hall (Plate)', isStereo: true, role: 'FX Send', faderDb: 0.0, color: 'purple', pan: 0 },
+      { busNum: 15, name: 'FX 2 Stereo Delay', isStereo: true, role: 'FX Send', faderDb: -2.0, color: 'purple', pan: 0 }
+    ],
+    dcas: [
+      { dcaNum: 1, name: 'Zpěvy (Vocal All)', color: 'cyan', faderDb: 0.0, muted: false, memberChannels: 'CH 1-4' },
+      { dcaNum: 2, name: 'Kytary & Dechy', color: 'yellow', faderDb: 0.0, muted: false, memberChannels: 'CH 5-10' },
+      { dcaNum: 3, name: 'Baskytara', color: 'blue', faderDb: 0.0, muted: false, memberChannels: 'CH 11' },
+      { dcaNum: 4, name: 'Bicí souprava', color: 'orange', faderDb: 0.0, muted: false, memberChannels: 'CH 12-18' },
+      { dcaNum: 5, name: 'Audio linky & Playback', color: 'gray', faderDb: -2.0, muted: false, memberChannels: 'CH 19-24' }
+    ],
+    fxSlots: [
+      { slotNum: 1, model: 'Vintage Room Reverb', name: 'Vocal Plate', type: 'Send/Return', source: 'Bus 13-14', target: 'FX 1 Return', keyParam: 'Decay: 2.2s, Pre: 20ms' },
+      { slotNum: 2, model: 'Stereo Delay', name: '1/4 Note Delay', type: 'Send/Return', source: 'Bus 15-16', target: 'FX 2 Return', keyParam: 'Tempo: 120, Feed: 30%' },
+      { slotNum: 3, model: 'Hall Reverb', name: 'Snare Ambience', type: 'Send/Return', source: 'Bus 11-12', target: 'FX 3 Return', keyParam: 'Decay: 1.4s' }
+    ]
+  },
+  {
+    id: 'scene-x32-producer-live-16',
+    name: 'X32 Producer Club Setup (16ch Local)',
+    type: 'snapshot',
+    createdAt: '2026-08-15T14:00:00Z',
+    updatedAt: '2026-09-02T16:00:00Z',
+    tags: ['X32 Producer', 'Club', '16ch', 'Midas'],
+    description: 'Klubový setup optimalizovaný přímo pro kompaktní rozhraní X32 Producer s 16 lokálními Midas XLR preampy a 6 TRS Auxy.',
+    favorite: false,
+    channelCount: 16,
+    scope: {
+      channels: true,
+      aux: true,
+      buses: true,
+      mains: true,
+      matrix: true,
+      eq: true,
+      dyn: true,
+      gate: true,
+      fx: true,
+      routing: true,
+      dca: true,
+      muteGroups: true
+    },
+    details: {
+      targetEnsemble: 'Klubová kapela (X32 Producer Rack/Desk)',
+      faderLayerPreset: 'CH 1-8: Rytmika | CH 9-16: Melodie & Zpěv',
+      mainFaderAssign: 'Main Stereo L/R',
+      customControlsProfile: 'X32 Producer Mute Groups',
+      notes: 'Plně vyhovuje fyzickým 16 XLR vstupům pultu X32 Producer bez nutnosti digitálního stageboxu.'
+    },
+    channels: [
+      { chNum: 1, name: 'Kick In', sourceInput: 'Local In 1 (XLR)', gainDb: 22, phantom48V: false, phaseInvert: false, color: 'orange', icon: 'Drum', faderDb: 0.0, pan: 0, muted: false, solo: false, gateOn: true, gateModel: 'X32 Expander/Gate', eqModel: 'X32 4-Band Parametric EQ', compOn: true, compModel: 'X32 Channel Comp', dcaGroup: 1 },
+      { chNum: 2, name: 'Snare Top', sourceInput: 'Local In 2 (XLR)', gainDb: 24, phantom48V: false, phaseInvert: false, color: 'orange', icon: 'Drum', faderDb: 0.0, pan: 0, muted: false, solo: false, gateOn: true, gateModel: 'X32 Expander/Gate', eqModel: 'X32 4-Band Parametric EQ', compOn: true, compModel: 'X32 Channel Comp', dcaGroup: 1 },
+      { chNum: 3, name: 'Tom 1', sourceInput: 'Local In 3 (XLR)', gainDb: 26, phantom48V: false, phaseInvert: false, color: 'orange', icon: 'Tom', faderDb: -2.0, pan: -30, muted: false, solo: false, gateOn: true, gateModel: 'X32 Expander/Gate', eqModel: 'X32 4-Band Parametric EQ', compOn: true, compModel: 'X32 Channel Comp', dcaGroup: 1 },
+      { chNum: 4, name: 'Tom 2', sourceInput: 'Local In 4 (XLR)', gainDb: 26, phantom48V: false, phaseInvert: false, color: 'orange', icon: 'Tom', faderDb: -2.0, pan: 30, muted: false, solo: false, gateOn: true, gateModel: 'X32 Expander/Gate', eqModel: 'X32 4-Band Parametric EQ', compOn: true, compModel: 'X32 Channel Comp', dcaGroup: 1 },
+      { chNum: 5, name: 'Overheads (Stereo)', sourceInput: 'Local In 5-6 (XLR)', gainDb: 32, phantom48V: true, phaseInvert: false, color: 'yellow', icon: 'Cymbal', faderDb: -3.0, pan: 0, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'X32 4-Band Parametric EQ', compOn: false, compModel: 'Bypass', dcaGroup: 1 },
+      { chNum: 6, name: 'Bass DI', sourceInput: 'Local In 7 (XLR)', gainDb: 20, phantom48V: false, phaseInvert: false, color: 'blue', icon: 'Bass', faderDb: 0.0, pan: 0, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'X32 4-Band Parametric EQ', compOn: true, compModel: 'X32 Channel Comp', dcaGroup: 2 },
+      { chNum: 7, name: 'El. Guitar L', sourceInput: 'Local In 8 (XLR)', gainDb: 26, phantom48V: false, phaseInvert: false, color: 'green', icon: 'Guitar', faderDb: -1.0, pan: -60, muted: false, solo: false, gateOn: true, gateModel: 'X32 Expander/Gate', eqModel: 'X32 4-Band Parametric EQ', compOn: false, compModel: 'Bypass', dcaGroup: 3 },
+      { chNum: 8, name: 'El. Guitar R', sourceInput: 'Local In 9 (XLR)', gainDb: 26, phantom48V: false, phaseInvert: false, color: 'green', icon: 'Guitar', faderDb: -1.0, pan: 60, muted: false, solo: false, gateOn: true, gateModel: 'X32 Expander/Gate', eqModel: 'X32 4-Band Parametric EQ', compOn: false, compModel: 'Bypass', dcaGroup: 3 },
+      { chNum: 9, name: 'Acoustic Guitar', sourceInput: 'Local In 10 (XLR)', gainDb: 28, phantom48V: true, phaseInvert: false, color: 'green', icon: 'Acoustic', faderDb: -2.0, pan: 0, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'X32 4-Band Parametric EQ', compOn: true, compModel: 'X32 Channel Comp', dcaGroup: 3 },
+      { chNum: 10, name: 'Keys Stereo', sourceInput: 'Local In 11-12 (XLR)', gainDb: 16, phantom48V: false, phaseInvert: false, color: 'magenta', icon: 'Keys', faderDb: -2.5, pan: 0, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'X32 4-Band Parametric EQ', compOn: false, compModel: 'Bypass', dcaGroup: 4 },
+      { chNum: 11, name: 'Lead Vox', sourceInput: 'Local In 13 (XLR)', gainDb: 34, phantom48V: false, phaseInvert: false, color: 'red', icon: 'Mic', faderDb: 2.0, pan: 0, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'X32 4-Band Parametric EQ + HPF 120Hz', compOn: true, compModel: 'X32 Channel Comp', dcaGroup: 5 },
+      { chNum: 12, name: 'Backing Vox Gtr', sourceInput: 'Local In 14 (XLR)', gainDb: 32, phantom48V: false, phaseInvert: false, color: 'red', icon: 'Mic', faderDb: -1.5, pan: -35, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'X32 4-Band Parametric EQ', compOn: true, compModel: 'X32 Channel Comp', dcaGroup: 5 },
+      { chNum: 13, name: 'Backing Vox Bass', sourceInput: 'Local In 15 (XLR)', gainDb: 32, phantom48V: false, phaseInvert: false, color: 'red', icon: 'Mic', faderDb: -1.5, pan: 35, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'X32 4-Band Parametric EQ', compOn: true, compModel: 'X32 Channel Comp', dcaGroup: 5 },
+      { chNum: 14, name: 'Talkback Mic', sourceInput: 'Local In 16 (XLR)', gainDb: 36, phantom48V: false, phaseInvert: false, color: 'gray', icon: 'Radio', faderDb: -90.0, pan: 0, muted: false, solo: false, gateOn: true, gateModel: 'X32 Expander/Gate', eqModel: 'X32 4-Band Parametric EQ', compOn: true, compModel: 'X32 Channel Comp' }
+    ],
+    buses: [
+      { busNum: 1, name: 'IEM Frontman', isStereo: false, role: 'IEM Monitor', faderDb: 0.0, color: 'red', pan: 0 },
+      { busNum: 2, name: 'IEM Band', isStereo: false, role: 'IEM Monitor', faderDb: 0.0, color: 'cyan', pan: 0 },
+      { busNum: 3, name: 'Wedge Kytary', isStereo: false, role: 'Wedge Monitor', faderDb: -2.0, color: 'yellow', pan: 0 },
+      { busNum: 4, name: 'FX 1 Hall', isStereo: false, role: 'FX Send', faderDb: 0.0, color: 'purple', pan: 0 },
+      { busNum: 5, name: 'FX 2 Delay', isStereo: false, role: 'FX Send', faderDb: 0.0, color: 'purple', pan: 0 }
+    ],
+    dcas: [
+      { dcaNum: 1, name: 'Bicí', color: 'orange', faderDb: 0.0, muted: false, memberChannels: 'CH 1-5' },
+      { dcaNum: 2, name: 'Basa', color: 'blue', faderDb: 0.0, muted: false, memberChannels: 'CH 6' },
+      { dcaNum: 3, name: 'Kytary', color: 'green', faderDb: 0.0, muted: false, memberChannels: 'CH 7-9' },
+      { dcaNum: 4, name: 'Klávesy', color: 'magenta', faderDb: 0.0, muted: false, memberChannels: 'CH 10' },
+      { dcaNum: 5, name: 'Zpěvy', color: 'red', faderDb: 0.0, muted: false, memberChannels: 'CH 11-13' }
+    ]
+  }
+];
+
+export const INITIAL_SCENES_UI24: SavedScene[] = [
+  {
+    id: 'scene-ui24-full-band-live',
+    name: 'Soundcraft Ui24R Live Band Standard',
+    type: 'snapshot',
+    createdAt: '2026-08-01T12:00:00Z',
+    updatedAt: '2026-09-01T14:30:00Z',
+    tags: ['Soundcraft', 'Ui24R', 'Studer', 'dbx', 'Lexicon', 'Live'],
+    description: 'Kompletní sestava pro Soundcraft Ui24R: 20 mikrofonních vstupů Studer, Lexicon Reverb/Delay, dbx komprese na stopách a 8 nezávislých Aux odposlechů.',
+    favorite: true,
+    channelCount: 20,
+    scope: {
+      channels: true,
+      aux: true,
+      buses: true,
+      mains: true,
+      matrix: true,
+      eq: true,
+      dyn: true,
+      gate: true,
+      fx: true,
+      routing: true,
+      dca: true,
+      muteGroups: true
+    },
+    details: {
+      targetEnsemble: 'Live Kapela (Soundcraft Ui24R)',
+      faderLayerPreset: 'Ui24R HTML5 Browser Faders',
+      mainFaderAssign: 'Main L/R (XLR/TRS)',
+      customControlsProfile: 'dbx AFS2 Zpětnovazební filtry',
+      notes: 'Předzesilovače Studer s vysokým headroomem, 4 stereo Lexicon efekty a 6 VCA faderů.'
+    },
+    channels: [
+      { chNum: 1, name: 'Kick In', sourceInput: 'Studer In 1 (Combo)', gainDb: 22, phantom48V: false, phaseInvert: false, color: 'orange', icon: 'Drum', faderDb: 0.0, pan: 0, muted: false, solo: false, gateOn: true, gateModel: 'Ui dbx Noise Gate', eqModel: 'Ui 4-Band Parametric + HPF', compOn: true, compModel: 'Ui dbx Compressor', dcaGroup: 1 },
+      { chNum: 2, name: 'Snare Top', sourceInput: 'Studer In 2 (Combo)', gainDb: 24, phantom48V: false, phaseInvert: false, color: 'orange', icon: 'Drum', faderDb: 0.0, pan: 0, muted: false, solo: false, gateOn: true, gateModel: 'Ui dbx Noise Gate', eqModel: 'Ui 4-Band Parametric + HPF', compOn: true, compModel: 'Ui dbx Compressor', dcaGroup: 1 },
+      { chNum: 3, name: 'Hi-Hat', sourceInput: 'Studer In 3 (Combo)', gainDb: 20, phantom48V: true, phaseInvert: false, color: 'orange', icon: 'Cymbal', faderDb: -5.0, pan: -25, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'Ui 4-Band Parametric + HPF 300Hz', compOn: false, compModel: 'Bypass', dcaGroup: 1 },
+      { chNum: 4, name: 'Tom 1', sourceInput: 'Studer In 4 (Combo)', gainDb: 26, phantom48V: false, phaseInvert: false, color: 'orange', icon: 'Tom', faderDb: -2.0, pan: -30, muted: false, solo: false, gateOn: true, gateModel: 'Ui dbx Noise Gate', eqModel: 'Ui 4-Band Parametric', compOn: true, compModel: 'Ui dbx Compressor', dcaGroup: 1 },
+      { chNum: 5, name: 'Floor Tom', sourceInput: 'Studer In 5 (Combo)', gainDb: 26, phantom48V: false, phaseInvert: false, color: 'orange', icon: 'Tom', faderDb: -2.0, pan: 35, muted: false, solo: false, gateOn: true, gateModel: 'Ui dbx Noise Gate', eqModel: 'Ui 4-Band Parametric', compOn: true, compModel: 'Ui dbx Compressor', dcaGroup: 1 },
+      { chNum: 6, name: 'Overhead L', sourceInput: 'Studer In 6 (Combo)', gainDb: 30, phantom48V: true, phaseInvert: false, color: 'yellow', icon: 'Cymbal', faderDb: -3.0, pan: -70, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'Ui 4-Band Parametric', compOn: false, compModel: 'Bypass', dcaGroup: 1 },
+      { chNum: 7, name: 'Overhead R', sourceInput: 'Studer In 7 (Combo)', gainDb: 30, phantom48V: true, phaseInvert: false, color: 'yellow', icon: 'Cymbal', faderDb: -3.0, pan: 70, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'Ui 4-Band Parametric', compOn: false, compModel: 'Bypass', dcaGroup: 1 },
+      { chNum: 8, name: 'Bass DI', sourceInput: 'Studer In 8 (Combo)', gainDb: 22, phantom48V: false, phaseInvert: false, color: 'blue', icon: 'Bass', faderDb: 0.0, pan: 0, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'Ui 4-Band Parametric', compOn: true, compModel: 'Ui dbx Compressor', dcaGroup: 2 },
+      { chNum: 9, name: 'El. Guitar L', sourceInput: 'Studer In 9 (Combo)', gainDb: 26, phantom48V: false, phaseInvert: false, color: 'green', icon: 'Guitar', faderDb: -1.5, pan: -60, muted: false, solo: false, gateOn: true, gateModel: 'Ui dbx Noise Gate', eqModel: 'Ui 4-Band Parametric', compOn: false, compModel: 'Bypass', dcaGroup: 3 },
+      { chNum: 10, name: 'El. Guitar R', sourceInput: 'Studer In 10 (Combo)', gainDb: 26, phantom48V: false, phaseInvert: false, color: 'green', icon: 'Guitar', faderDb: -1.5, pan: 60, muted: false, solo: false, gateOn: true, gateModel: 'Ui dbx Noise Gate', eqModel: 'Ui 4-Band Parametric', compOn: false, compModel: 'Bypass', dcaGroup: 3 },
+      { chNum: 11, name: 'Acoustic Gtr', sourceInput: 'Studer In 11 (XLR)', gainDb: 28, phantom48V: true, phaseInvert: false, color: 'green', icon: 'Acoustic', faderDb: -2.0, pan: 0, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'Ui 4-Band Parametric + DigiTech Modeling', compOn: true, compModel: 'Ui dbx Compressor', dcaGroup: 3 },
+      { chNum: 12, name: 'Keys L (Stereo)', sourceInput: 'Studer In 12 (XLR)', gainDb: 18, phantom48V: false, phaseInvert: false, color: 'magenta', icon: 'Keys', faderDb: -2.0, pan: -75, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'Ui 4-Band Parametric', compOn: false, compModel: 'Bypass', dcaGroup: 4 },
+      { chNum: 13, name: 'Keys R (Stereo)', sourceInput: 'Studer In 13 (XLR)', gainDb: 18, phantom48V: false, phaseInvert: false, color: 'magenta', icon: 'Keys', faderDb: -2.0, pan: 75, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'Ui 4-Band Parametric', compOn: false, compModel: 'Bypass', dcaGroup: 4 },
+      { chNum: 14, name: 'Lead Vocal', sourceInput: 'Studer In 14 (XLR)', gainDb: 34, phantom48V: false, phaseInvert: false, color: 'red', icon: 'Mic', faderDb: 2.0, pan: 0, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'Ui 4-Band Parametric + HPF 120Hz + De-Esser', compOn: true, compModel: 'Ui dbx 160 Compressor', dcaGroup: 5 },
+      { chNum: 15, name: 'Backing Voc Gtr', sourceInput: 'Studer In 15 (XLR)', gainDb: 32, phantom48V: false, phaseInvert: false, color: 'red', icon: 'Mic', faderDb: -1.0, pan: -40, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'Ui 4-Band Parametric + De-Esser', compOn: true, compModel: 'Ui dbx Compressor', dcaGroup: 5 },
+      { chNum: 16, name: 'Backing Voc Bass', sourceInput: 'Studer In 16 (XLR)', gainDb: 32, phantom48V: false, phaseInvert: false, color: 'red', icon: 'Mic', faderDb: -1.0, pan: 40, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'Ui 4-Band Parametric + De-Esser', compOn: true, compModel: 'Ui dbx Compressor', dcaGroup: 5 },
+      { chNum: 17, name: 'Saxophone', sourceInput: 'Studer In 17 (XLR)', gainDb: 30, phantom48V: false, phaseInvert: false, color: 'cyan', icon: 'Music', faderDb: 0.0, pan: -15, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'Ui 4-Band Parametric', compOn: true, compModel: 'Ui dbx Compressor', dcaGroup: 5 },
+      { chNum: 18, name: 'Trumpet', sourceInput: 'Studer In 18 (XLR)', gainDb: 26, phantom48V: false, phaseInvert: false, color: 'cyan', icon: 'Music', faderDb: 0.0, pan: 15, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'Ui 4-Band Parametric', compOn: true, compModel: 'Ui dbx Compressor', dcaGroup: 5 },
+      { chNum: 19, name: 'USB Player L', sourceInput: 'Line In L (RCA/USB)', gainDb: 0, phantom48V: false, phaseInvert: false, color: 'gray', icon: 'Music', faderDb: -6.0, pan: -100, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'Ui 4-Band Parametric', compOn: false, compModel: 'Bypass' },
+      { chNum: 20, name: 'USB Player R', sourceInput: 'Line In R (RCA/USB)', gainDb: 0, phantom48V: false, phaseInvert: false, color: 'gray', icon: 'Music', faderDb: -6.0, pan: 100, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'Ui 4-Band Parametric', compOn: false, compModel: 'Bypass' }
+    ],
+    buses: [
+      { busNum: 1, name: 'Aux 1: IEM Lead (XLR)', isStereo: false, role: 'IEM Monitor', faderDb: 0.0, color: 'red', pan: 0 },
+      { busNum: 2, name: 'Aux 2: Wedge Band (XLR)', isStereo: false, role: 'Wedge Monitor', faderDb: 0.0, color: 'cyan', pan: 0 },
+      { busNum: 3, name: 'Aux 3: Wedge Kytary (XLR)', isStereo: false, role: 'Wedge Monitor', faderDb: -2.0, color: 'yellow', pan: 0 },
+      { busNum: 4, name: 'Aux 4: Wedge Bicí (XLR)', isStereo: false, role: 'Wedge Monitor', faderDb: 0.0, color: 'orange', pan: 0 },
+      { busNum: 5, name: 'FX 1: Lexicon Hall', isStereo: true, role: 'FX Send', faderDb: 0.0, color: 'purple', pan: 0 },
+      { busNum: 6, name: 'FX 2: Lexicon Delay', isStereo: true, role: 'FX Send', faderDb: -3.0, color: 'purple', pan: 0 },
+      { busNum: 7, name: 'FX 3: Lexicon Chorus', isStereo: true, role: 'FX Send', faderDb: -6.0, color: 'purple', pan: 0 },
+      { busNum: 8, name: 'FX 4: Lexicon Room', isStereo: true, role: 'FX Send', faderDb: -4.0, color: 'purple', pan: 0 }
+    ],
+    dcas: [
+      { dcaNum: 1, name: 'VCA 1: Bicí souprava', color: 'orange', faderDb: 0.0, muted: false, memberChannels: 'CH 1-7' },
+      { dcaNum: 2, name: 'VCA 2: Baskytara', color: 'blue', faderDb: 0.0, muted: false, memberChannels: 'CH 8' },
+      { dcaNum: 3, name: 'VCA 3: Kytary', color: 'green', faderDb: 0.0, muted: false, memberChannels: 'CH 9-11' },
+      { dcaNum: 4, name: 'VCA 4: Klávesy', color: 'magenta', faderDb: 0.0, muted: false, memberChannels: 'CH 12-13' },
+      { dcaNum: 5, name: 'VCA 5: Zpěvy & Dechy', color: 'red', faderDb: 0.0, muted: false, memberChannels: 'CH 14-18' },
+      { dcaNum: 6, name: 'VCA 6: FX Returns', color: 'purple', faderDb: 0.0, muted: false, memberChannels: 'FX 1-4' }
+    ]
+  },
+  {
+    id: 'scene-ui24-acoustic-club',
+    name: 'Soundcraft Ui24R Akustické Trio',
+    type: 'snapshot',
+    createdAt: '2026-08-12T16:00:00Z',
+    updatedAt: '2026-09-02T11:00:00Z',
+    tags: ['Soundcraft', 'Ui24R', 'Akustika', 'Club', 'Lexicon'],
+    description: 'Jemný klubový setup pro akustické trio (akustické kytary, cajon/perkuse, zpěvy) se Studer preampy a Lexicon Warm Hall.',
+    favorite: false,
+    channelCount: 8,
+    scope: {
+      channels: true,
+      aux: true,
+      buses: true,
+      mains: true,
+      matrix: true,
+      eq: true,
+      dyn: true,
+      gate: true,
+      fx: true,
+      routing: true,
+      dca: true,
+      muteGroups: true
+    },
+    details: {
+      targetEnsemble: 'Akustické trio (Folk / Jazz / Pop)',
+      faderLayerPreset: 'Ui24R Acoustic Standard',
+      mainFaderAssign: 'Main L/R',
+      customControlsProfile: 'Acoustic Feedback Suppress',
+      notes: 'Optimalizováno pro přirozený dozvuk dřeva a hlasů s minimální kompresí.'
+    },
+    channels: [
+      { chNum: 1, name: 'Cajon Bass', sourceInput: 'Studer In 1 (Combo)', gainDb: 24, phantom48V: false, phaseInvert: false, color: 'orange', icon: 'Drum', faderDb: 0.0, pan: 0, muted: false, solo: false, gateOn: true, gateModel: 'Ui dbx Noise Gate', eqModel: 'Ui 4-Band Parametric + HPF 40Hz', compOn: true, compModel: 'Ui dbx Compressor', dcaGroup: 1 },
+      { chNum: 2, name: 'Cajon Slap', sourceInput: 'Studer In 2 (Combo)', gainDb: 26, phantom48V: false, phaseInvert: false, color: 'orange', icon: 'Drum', faderDb: -1.0, pan: 0, muted: false, solo: false, gateOn: true, gateModel: 'Ui dbx Noise Gate', eqModel: 'Ui 4-Band Parametric', compOn: true, compModel: 'Ui dbx Compressor', dcaGroup: 1 },
+      { chNum: 3, name: 'Akustika 1', sourceInput: 'Studer In 3 (Combo)', gainDb: 28, phantom48V: true, phaseInvert: false, color: 'yellow', icon: 'Acoustic', faderDb: 0.0, pan: -30, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'Ui 4-Band Parametric + HPF 80Hz', compOn: true, compModel: 'Ui dbx Compressor', dcaGroup: 2 },
+      { chNum: 4, name: 'Akustika 2', sourceInput: 'Studer In 4 (Combo)', gainDb: 28, phantom48V: true, phaseInvert: false, color: 'yellow', icon: 'Acoustic', faderDb: 0.0, pan: 30, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'Ui 4-Band Parametric + HPF 80Hz', compOn: true, compModel: 'Ui dbx Compressor', dcaGroup: 2 },
+      { chNum: 5, name: 'Housle Solo', sourceInput: 'Studer In 5 (Combo)', gainDb: 32, phantom48V: true, phaseInvert: false, color: 'green', icon: 'Music', faderDb: 0.5, pan: 0, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'Ui 4-Band Parametric', compOn: true, compModel: 'Ui dbx Compressor', dcaGroup: 2 },
+      { chNum: 6, name: 'Lead Zpěv', sourceInput: 'Studer In 6 (Combo)', gainDb: 34, phantom48V: false, phaseInvert: false, color: 'red', icon: 'Mic', faderDb: 2.0, pan: 0, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'Ui 4-Band Parametric + De-Esser', compOn: true, compModel: 'Ui dbx Compressor', dcaGroup: 3 },
+      { chNum: 7, name: 'Vokál 2', sourceInput: 'Studer In 7 (Combo)', gainDb: 32, phantom48V: false, phaseInvert: false, color: 'red', icon: 'Mic', faderDb: -1.0, pan: -40, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'Ui 4-Band Parametric + De-Esser', compOn: true, compModel: 'Ui dbx Compressor', dcaGroup: 3 },
+      { chNum: 8, name: 'Vokál 3', sourceInput: 'Studer In 8 (Combo)', gainDb: 32, phantom48V: false, phaseInvert: false, color: 'red', icon: 'Mic', faderDb: -1.0, pan: 40, muted: false, solo: false, gateOn: false, gateModel: 'Bypass', eqModel: 'Ui 4-Band Parametric + De-Esser', compOn: true, compModel: 'Ui dbx Compressor', dcaGroup: 3 }
+    ],
+    buses: [
+      { busNum: 1, name: 'Aux 1: Odposlech L', isStereo: false, role: 'Wedge Monitor', faderDb: 0.0, color: 'cyan', pan: 0 },
+      { busNum: 2, name: 'Aux 2: Odposlech R', isStereo: false, role: 'Wedge Monitor', faderDb: 0.0, color: 'cyan', pan: 0 },
+      { busNum: 5, name: 'FX 1: Lexicon Warm Hall', isStereo: true, role: 'FX Send', faderDb: 0.0, color: 'purple', pan: 0 }
+    ],
+    dcas: [
+      { dcaNum: 1, name: 'VCA 1: Perkuse', color: 'orange', faderDb: 0.0, muted: false, memberChannels: 'CH 1-2' },
+      { dcaNum: 2, name: 'VCA 2: Strunné nástroje', color: 'yellow', faderDb: 0.0, muted: false, memberChannels: 'CH 3-5' },
+      { dcaNum: 3, name: 'VCA 3: Zpěvy', color: 'red', faderDb: 0.0, muted: false, memberChannels: 'CH 6-8' }
+    ]
+  }
+];
+
+export const getInitialScenesForMixer = (mixerId: string): SavedScene[] => {
+  if (mixerId === 'x32') return INITIAL_SCENES_X32;
+  if (mixerId === 'ui24') return INITIAL_SCENES_UI24;
+  return INITIAL_SCENES_WING;
+};

@@ -26,11 +26,17 @@ import {
   FX_LATENCY_MAP 
 } from '../utils/audioDiagnostics';
 
+import { MixerId } from '../types';
+
 interface DiagnosticsPanelProps {
   onOpenAppendix?: () => void;
+  activeMixerId?: MixerId;
 }
 
-export const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({ onOpenAppendix }) => {
+export const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({ 
+  onOpenAppendix,
+  activeMixerId = 'wing'
+}) => {
   // AES50 Error Counters State
   const [aes50Errors, setAes50Errors] = useState({
     portA: { cor: 0, unc: 0, locked: true, device: 'Midas DL32 (Stage A)' },
@@ -105,10 +111,18 @@ export const DiagnosticsPanel: React.FC<DiagnosticsPanelProps> = ({ onOpenAppend
           </div>
           <div>
             <h3 className="text-base sm:text-lg font-bold text-white">
-              Systémová diagnostika & Testovací centrum WING Compact
+              {activeMixerId === 'x32' 
+                ? 'Systémová diagnostika & Testovací centrum Behringer X32' 
+                : activeMixerId === 'ui24' 
+                ? 'Systémová diagnostika & Testovací centrum Soundcraft Ui24R' 
+                : 'Systémová diagnostika & Testovací centrum WING Compact'}
             </h3>
             <p className="text-xs sm:text-sm text-white/60 mt-0.5">
-              Měření chybovosti AES50 portů, analýza latence signálových cest a generátor testovacích tónů
+              {activeMixerId === 'x32'
+                ? 'Měření chybovosti 2x AES50 portů, Ultranet P16 monitoring, latence DSP a signálový generátor'
+                : activeMixerId === 'ui24'
+                ? 'Stav Wi-Fi 2.4/5GHz hotspotu, LAN ethernetové rozhraní, latence Studer/Ui DSP a testovací tóny'
+                : 'Měření chybovosti AES50 portů, StageConnect sběrnice, analýza latence signálových cest a generátor tónů'}
             </p>
           </div>
         </div>
